@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">直播平台</string>
+
+    <!--占位字符-->
+    <string name="placeholder">TEST</string>
+
+    <!--错误信息-->
+    <string name="networkError">请检查网络连接</string>
+    <string name="timeoutError">网络请求超时,请稍后重试！</string>
+    <string name="connectError">无法连接到服务器！</string>
+    <string name="retry">重试</string>
+
+    <!--字体图标-->
+    <string name="iconBack">返回</string>
+</resources>

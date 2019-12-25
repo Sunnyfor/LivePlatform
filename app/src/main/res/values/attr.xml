@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--自定义子条目布局属性-->
+    <declare-styleable name="ItemLayout">
+        <attr name="startText" format="string" />
+        <attr name="startTextSize" format="dimension|reference" />
+        <attr name="startIcon" format="reference" />
+        <attr name="android:text" />
+        <attr name="android:textSize" />
+        <attr name="rightText" format="string" />
+        <attr name="rightTextSize" format="dimension|reference" />
+        <attr name="endText" format="string" />
+        <attr name="endTextSize" format="dimension|reference" />
+        <attr name="endIcon" format="reference" />
+    </declare-styleable>
+
+    <!-- circular cover view -->
+    <declare-styleable name="CircularCoverView">
+        <attr name="left_top_radius" format="dimension" />
+        <attr name="left_bottom_radius" format="dimension" />
+        <attr name="right_top_radius" format="dimension" />
+        <attr name="right_bottom_radius" format="dimension" />
+        <attr name="cover_color" format="color" />
+    </declare-styleable>
+
+</resources>

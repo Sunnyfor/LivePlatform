@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/dp_10"
+    android:background="@drawable/sel_border"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_10">
+
+    <ImageView
+        android:id="@+id/iv_live_room_cover"
+        android:layout_width="@dimen/dp_120"
+        android:layout_height="@dimen/dp_80"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_svg_default_image" />
+
+    <TextView
+        android:id="@+id/tv_live_room_name"
+        style="@style/style_font_black"
+        android:layout_toEndOf="@id/iv_live_room_cover"
+        android:padding="@dimen/dp_10"
+        tools:text="JoannChen的直播间" />
+
+    <TextView
+        android:id="@+id/tv_live_creator"
+        style="@style/style_font_black"
+        android:layout_below="@id/tv_live_room_name"
+        android:layout_toEndOf="@id/iv_live_room_cover"
+        android:padding="@dimen/dp_10"
+        tools:text="JoannChen" />
+
+    <TextView
+        android:id="@+id/tv_create_time"
+        style="@style/style_font_gray"
+        android:layout_below="@id/iv_live_room_cover"
+        android:padding="@dimen/dp_10"
+        android:textSize="@dimen/sp_10"
+        tools:text="2019年12月25日 18:09:05" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tv_create_time"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/dp_5">
+
+        <ImageView
+            android:id="@+id/icon1"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:src="@drawable/icon_default_1" />
+
+        <ImageView
+            android:id="@+id/icon2"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginStart="@dimen/dp_15"
+            android:src="@drawable/icon_default_3" />
+
+        <ImageView
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginStart="@dimen/dp_30"
+            android:src="@drawable/icon_default_2" />
+    </RelativeLayout>
+
+</RelativeLayout>

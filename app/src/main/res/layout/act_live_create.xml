@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_live_cover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/dp_30"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:src="@drawable/ic_svg_default_image" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44">
+
+        <TextView
+            style="@style/style_create_project_text"
+            android:text="直播间名称" />
+
+        <EditText
+            android:id="@+id/et_live_name"
+            style="@style/style_create_project_edit"
+            android:hint="请输入名称" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44">
+
+        <TextView
+            style="@style/style_create_project_text"
+            android:text="直播分类" />
+
+        <TextView
+            android:id="@+id/tv_live_sort"
+            style="@style/style_create_project_edit"
+            android:hint="请选择" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/style_create_project_layout"
+        android:layout_height="@dimen/dp_140"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/style_create_project_text"
+            android:layout_height="@dimen/dp_44"
+            android:text="直播公告" />
+
+        <EditText
+            android:id="@+id/et_live_notice"
+            style="@style/style_create_project_edit"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginEnd="@dimen/dp_16"
+            android:background="@drawable/sel_border"
+            android:gravity="top"
+            android:hint="请输入"
+            android:padding="@dimen/dp_10" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_create"
+        style="@style/style_common_btn"
+        android:layout_marginTop="@dimen/dp_20"
+        android:text="创建" />
+
+</LinearLayout>

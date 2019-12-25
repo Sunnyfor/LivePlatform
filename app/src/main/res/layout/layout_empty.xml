@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/font_white">
+
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="@dimen/dp_100"
+        android:layout_height="@dimen/dp_100"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/dp_200"
+        android:src="@drawable/ic_svg_empty_view" />
+
+    <TextView
+        android:id="@+id/tv_desc"
+        style="@style/style_font_black"
+        android:layout_below="@id/iv_icon"
+        android:layout_centerHorizontal="true"
+        android:text="数据为空"
+        android:textSize="@dimen/sp_16" />
+
+    <Button
+        android:id="@+id/btn_retry"
+        style="@style/style_common_btn"
+        android:layout_width="@dimen/dp_100"
+        android:layout_below="@id/tv_desc"
+        android:text="@string/retry" />
+
+</RelativeLayout>
