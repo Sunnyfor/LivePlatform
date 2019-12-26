@@ -17,7 +17,7 @@ class LiveListBean {
         var liveId: String? = null
         var liveName: String? = null
         var liveCode: String? = null
-        var creator: String? = null
+        var creator: String? = null //创建者id
         var creatName: String? = null
         var creatTime: String? = null
         var liveState: String? = null

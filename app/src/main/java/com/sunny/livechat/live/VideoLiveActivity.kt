@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.text.TextUtils
 import android.util.Log
@@ -34,8 +35,6 @@ import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
 
 /**
  * Desc 直播播放页
@@ -196,9 +195,9 @@ class VideoLiveActivity : BaseActivity(), IChatListener {
 
         if (createrId == MLOC.userId) {
             if (liveId == null) {
-                createNewLive()
+                startActivity(Intent(this, CreateLiveRoomActivity::class.java))
             } else {
-                starLive()
+                startLive()
             }
         } else {
             joinLive()
@@ -360,52 +359,8 @@ class VideoLiveActivity : BaseActivity(), IChatListener {
 
     }
 
-    private fun createNewLive() {
-        //创建新直播
-        isUploader = true
-        val liveItem = XHLiveItem()
-        liveItem.liveName = liveName
-        liveItem.liveType = liveType
-        liveManager?.createLive(liveItem, object : IXHResultCallback {
-            override fun success(data: Any) {
-                liveId = data as String
-                starLive()
-                //上报到直播列表
-                try {
-                    val info = JSONObject()
-                    info.put("id", liveId)
-                    info.put("creator", MLOC.userId)
-                    info.put("name", liveName)
-                    var infostr = info.toString()
-                    infostr = URLEncoder.encode(infostr, "utf-8")
-                    if (MLOC.AEventCenterEnable) {
 
-//                        InterfaceUrls.demoSaveToList(MLOC.userId, MLOC.LIST_TYPE_LIVE, liveId, infostr)
-                    } else {
-                        liveManager?.saveToList(
-                            MLOC.userId,
-                            MLOC.LIST_TYPE_LIVE,
-                            liveId,
-                            infostr,
-                            null
-                        )
-                    }
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                } catch (e: UnsupportedEncodingException) {
-                    e.printStackTrace()
-                }
-
-            }
-
-            override fun failed(errMsg: String) {
-                MLOC.showMsg(this@VideoLiveActivity, errMsg)
-                stopAndFinish()
-            }
-        })
-    }
-
-    private fun starLive() {
+    private fun startLive() {
         //开始直播
         isUploader = true
         liveManager?.startLive(liveId, object : IXHResultCallback {

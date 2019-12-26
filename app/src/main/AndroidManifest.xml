@@ -26,12 +26,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".work.TotalProjectActivity" />
-
         <activity android:name=".live.CreateLiveRoomActivity" />
         <activity android:name=".live.LiveListActivity" />
         <activity android:name=".live.VideoLiveActivity" />
 
+        <service android:name=".service.KeepLiveService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.starrtc.demo.service.KeepLiveService" />
+            </intent-filter>
+        </service>
 
     </application>
 

@@ -50,6 +50,7 @@ object ApiManager {
         init()
     }
 
+    fun getOkHttpClient() = okHttpClient
 
     private fun init() {
 
