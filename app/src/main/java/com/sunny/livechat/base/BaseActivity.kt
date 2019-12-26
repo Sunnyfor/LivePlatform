@@ -9,7 +9,7 @@ import com.orhanobut.logger.Logger
 import com.sunny.livechat.R
 import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.factory.ViewType
-import kotlinx.android.synthetic.main.act_base.*
+import kotlinx.android.synthetic.main.activity_base.*
 import kotlinx.android.synthetic.main.layout_empty.view.*
 
 /**
@@ -40,7 +40,7 @@ abstract class BaseActivity : AppCompatActivity(), IBaseView, View.OnClickListen
 
         titleManager = TitleManager(this)
 
-        setContentView(R.layout.act_base)
+        setContentView(R.layout.activity_base)
 
         // 初始化标题栏
         if (initTitle() != null) {

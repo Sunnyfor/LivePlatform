@@ -1,5 +1,6 @@
 package com.sunny.livechat.login.presenter
 
+import com.sunny.livechat.base.BaseModel
 import com.sunny.livechat.base.BasePresenter
 import com.sunny.livechat.constant.UrlConstant
 import com.sunny.livechat.http.ApiManager
@@ -31,13 +32,13 @@ class LoginPresenter(view: ILoginView) : BasePresenter<ILoginView>(view) {
         params.put("password", password)
 
         ApiManager.postJson(composites, params.toString(), UrlConstant.LOGIN_URL,
-            object : ApiManager.OnResult<UserBean>() {
+            object : ApiManager.OnResult<BaseModel<UserBean>>() {
 
-                override fun onSuccess(model: UserBean) {
-                    view?.loginResult(model)
+                override fun onSuccess(model: BaseModel<UserBean>) {
+                    model.requestResult({ view?.loginResult(model.data) }, {})
                 }
 
-                override fun onFailed(code: String, message: String) {
+                override fun onFailed(code: String, msg: String) {
 
                 }
 

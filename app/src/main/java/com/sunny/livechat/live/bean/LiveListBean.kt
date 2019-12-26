@@ -1,5 +1,7 @@
 package com.sunny.livechat.live.bean
 
+import java.io.Serializable
+
 /**
  * Desc 直播列表实体类
  * Author JoannChen
@@ -13,17 +15,17 @@ class LiveListBean {
     var currPage = 0
     var list: ArrayList<LiveInfoBean>? = null
 
-    class LiveInfoBean {
-        var liveId: String? = null
+    class LiveInfoBean : Serializable {
+        var liveId: String? = null//直播间id，后端自动生成
         var liveName: String? = null
-        var liveCode: String? = null
+        var liveCode: String? = null//直播码，StarRtc服务端返回
         var creator: String? = null //创建者id
         var creatName: String? = null
         var creatTime: String? = null
         var liveState: String? = null
         var isMsg: String? = null
         var liveSrc: String? = null
-        var liveClassId: String? = null
+        var liveClassId: Int? = null//直播类型
         var liveNotice: String? = null
         var liveCover: String? = null
 

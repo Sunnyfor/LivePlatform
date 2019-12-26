@@ -8,14 +8,14 @@
     <LinearLayout
         android:id="@+id/ll_username"
         android:layout_width="@dimen/dp_240"
-        android:layout_height="@dimen/dp_40"
+        android:layout_height="@dimen/dp_60"
         android:layout_centerHorizontal="true">
 
         <ImageView
             android:layout_width="@dimen/dp_20"
             android:layout_height="@dimen/dp_15"
             android:layout_gravity="center"
-            android:src="@mipmap/icon_input_username" />
+            android:src="@drawable/icon_input_username" />
 
         <EditText
             android:id="@+id/et_username"
@@ -31,7 +31,7 @@
     <LinearLayout
         android:id="@+id/ll_password"
         android:layout_width="@dimen/dp_240"
-        android:layout_height="@dimen/dp_40"
+        android:layout_height="@dimen/dp_60"
         android:layout_below="@id/ll_username"
         android:layout_centerHorizontal="true">
 
@@ -39,7 +39,7 @@
             android:layout_width="@dimen/dp_20"
             android:layout_height="@dimen/dp_15"
             android:layout_gravity="center"
-            android:src="@mipmap/icon_input_password" />
+            android:src="@drawable/icon_input_password" />
 
         <EditText
             android:id="@+id/et_password"

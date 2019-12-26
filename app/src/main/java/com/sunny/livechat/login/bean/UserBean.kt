@@ -13,7 +13,7 @@ class UserBean {
     var userId: Int? = null
     var username: String? = null
     var roleIdList: ArrayList<Int>? = null
-    var createTime: Int? = null
+    var createTime: Long? = null
     var deptId: Int? = null
     var deptName: String? = null
     var levelCode: String? = null

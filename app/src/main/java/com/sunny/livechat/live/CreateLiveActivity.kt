@@ -12,7 +12,9 @@ import com.starrtc.starrtcsdk.api.XHLiveItem
 import com.starrtc.starrtcsdk.apiInterface.IXHResultCallback
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
+import com.sunny.livechat.base.BaseModel
 import com.sunny.livechat.chat.MLOC
+import com.sunny.livechat.constant.RefreshLiveListEvent
 import com.sunny.livechat.constant.UrlConstant
 import com.sunny.livechat.http.ApiManager
 import com.sunny.livechat.live.bean.LiveListBean
@@ -20,7 +22,8 @@ import com.sunny.livechat.util.GlideApp
 import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.URIUtil
 import com.sunny.livechat.util.intent.IntentValue
-import kotlinx.android.synthetic.main.act_live_create.*
+import kotlinx.android.synthetic.main.activity_live_create.*
+import org.greenrobot.eventbus.EventBus
 
 /**
  * Desc 创建直播间
@@ -28,11 +31,11 @@ import kotlinx.android.synthetic.main.act_live_create.*
  * Mail yongzuo.chen@foxmail.com
  * Date 2019/12/24 14:52
  */
-class CreateLiveRoomActivity : BaseActivity() {
+class CreateLiveActivity : BaseActivity() {
 
-    private var liveInfoBean: LiveListBean.LiveInfoBean? = null
+    private var liveInfoBean = LiveListBean.LiveInfoBean()
 
-    override fun setLayout(): Int = R.layout.act_live_create
+    override fun setLayout(): Int = R.layout.activity_live_create
 
     override fun initTitle(): View? = titleManager.defaultTitle("创建直播间")
 
@@ -62,7 +65,7 @@ class CreateLiveRoomActivity : BaseActivity() {
         if (requestCode == IntentValue.requestCode && resultCode == Activity.RESULT_OK && data != null) {
             val uri = data.data
             val path = URIUtil.getRealPathFromUri(this, uri)
-            liveInfoBean?.liveCover = path
+            liveInfoBean.liveCover = path
             GlideApp.with(this)
                 .load(path)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -73,23 +76,16 @@ class CreateLiveRoomActivity : BaseActivity() {
         }
     }
 
-    private fun doCreateLiveApi() {
+    private fun doCreateLiveApi(json: String) {
 
-        if (et_live_name.text.isEmpty()) {
-            ToastUtil.show("请输入直播间名称！")
-            return
-        }
-
-        val json = Gson().toJson(liveInfoBean)
-
-        ApiManager.postJson(
-            null,
-            json.toString(),
-            UrlConstant.CREATE_LIVE_ROOM_URL,
-            object : ApiManager.OnResult<LiveListBean>() {
-                override fun onSuccess(model: LiveListBean) {
-                    ToastUtil.show("创建成功")
-                    finish()
+        ApiManager.postJson(null, json, UrlConstant.CREATE_LIVE_ROOM_URL,
+            object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
+                override fun onSuccess(model: BaseModel<LiveListBean>) {
+                    model.requestResult({
+                        ToastUtil.show("创建成功")
+                        finish()
+                        EventBus.getDefault().post(RefreshLiveListEvent())
+                    }, {})
                 }
 
                 override fun onFailed(code: String, msg: String) {
@@ -99,8 +95,14 @@ class CreateLiveRoomActivity : BaseActivity() {
     }
 
     private fun doCreateLiveSDK() {
-        //创建新直播
+
         val liveName = et_live_name.text.toString()
+
+        if (liveName.isEmpty()) {
+            ToastUtil.show("请输入直播间名称！")
+            return
+        }
+
         val liveItem = XHLiveItem()
         liveItem.liveName = liveName
         liveItem.liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic
@@ -108,17 +110,21 @@ class CreateLiveRoomActivity : BaseActivity() {
         val liveManager = XHClient.getInstance().getLiveManager(this)
         liveManager?.createLive(liveItem, object : IXHResultCallback {
             override fun success(data: Any) {
-                val liveId = data as String
+
+                Logger.i("创建直播房间成功：SDK")
+
+                val liveCode = data as String
 
                 //上报到直播列表
-                liveInfoBean?.let {
-                    it.liveId = liveId
-                    it.liveName = liveName
-                    it.creator = MLOC.userId
-                    it.liveNotice = et_live_notice.text.toString()
-                }
 
-                doCreateLiveApi()
+                liveInfoBean.liveCode = liveCode
+                liveInfoBean.liveName = liveName
+                liveInfoBean.creator = MLOC.userId
+                liveInfoBean.liveNotice = et_live_notice.text.toString()
+
+                val json = Gson().toJson(liveInfoBean)
+
+                doCreateLiveApi(json)
 
             }
 

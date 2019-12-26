@@ -2,6 +2,7 @@ package com.sunny.livechat
 
 import android.app.Application
 import com.orhanobut.logger.*
+import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.util.NetworkUtil
 
 
@@ -27,6 +28,9 @@ class MyApplication : Application() {
         instance = this
 
         NetworkUtil.init()
+
+        MLOC.init(this)
+
         Logger.addLogAdapter(AndroidLogAdapter())
 
     }

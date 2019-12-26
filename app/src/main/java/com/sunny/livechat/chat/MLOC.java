@@ -32,12 +32,12 @@ public class MLOC {
     public static Context appContext;
     public static String userId = "";
 
-    public static String VOIP_SERVER_URL          = "rtc.zhenhekj.com:10086";
-    public static String IM_SERVER_URL            = "rtc.zhenhekj.com:19903";
-    public static String CHATROOM_SERVER_URL      = "rtc.zhenhekj.com:19906";
-    public static String LIVE_VDN_SERVER_URL      = "rtc.zhenhekj.com:19928";
-    public static String LIVE_SRC_SERVER_URL      = "rtc.zhenhekj.com:19931";
-    public static String LIVE_PROXY_SERVER_URL    = "rtc.zhenhekj.com:19932";
+    public static String VOIP_SERVER_URL          = "rtc.110zhuangbei.com:10086";
+    public static String IM_SERVER_URL            = "rtc.110zhuangbei.com:19903";
+    public static String CHATROOM_SERVER_URL      = "rtc.110zhuangbei.com:19906";
+    public static String LIVE_SRC_SERVER_URL      = "rtc.110zhuangbei.com:19931";//主播：多人视频会议RTMP推流
+    public static String LIVE_VDN_SERVER_URL      = "rtc.110zhuangbei.com:19928";//观众：互动连麦直播，vdn分发网络
+    public static String LIVE_PROXY_SERVER_URL    = "rtc.110zhuangbei.com:19932";//RTSP 拉流服务端
 
     public static Boolean AEventCenterEnable = false;
 
@@ -314,7 +314,7 @@ public class MLOC {
                 dialogs[0].setContentView(R.layout.dialog_new_msg);
                 Window win = dialogs[0].getWindow();
                 win.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-                win.setWindowAnimations(R.style.dialog_notify_animation);
+                win.setWindowAnimations(R.style.style_dialog_notify_animation);
                 win.setGravity(Gravity.TOP);
                 dialogs[0].setCanceledOnTouchOutside(true);
             }

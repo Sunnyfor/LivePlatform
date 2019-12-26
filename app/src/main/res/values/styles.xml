@@ -9,14 +9,14 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppBaseTheme" parent="android:Theme.Light" />
 
-    <style name="MyEditText" parent="Theme.AppCompat.Light">
-        <item name="colorControlNormal">@color/color_hui</item>
-        <item name="colorControlActivated">@color/btn_pressed_color</item>
+    <style name="TranslucentTheme" parent="AppTheme">
+        <!--在Android 4.4之前的版本上运行，直接跟随系统主题-->
     </style>
 
 
-    <style name="TranslucentTheme" parent="AppTheme">
+    <style name="AppTranslucentTheme" parent="AppTheme">
         <!--在Android 4.4之前的版本上运行，直接跟随系统主题-->
     </style>
 
@@ -30,40 +30,6 @@
         <item name="android:windowBackground">@color/transparent</item><!--背景透明-->
         <item name="android:backgroundDimEnabled">false</item><!--模糊-->
     </style>
-
-
-
-    <!--聊天輸入框-->
-    <style name="text_subhead_black">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/text_title</item>
-        <item name="android:textSize">@dimen/sp_17</item>
-    </style>
-
-
-    <style name="text_body">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/text_sub</item>
-        <item name="android:textSize">@dimen/sp_15</item>
-    </style>
-
-
-    <style name="AppTranslucentTheme" parent="AppTheme">
-        <!--在Android 4.4之前的版本上运行，直接跟随系统主题-->
-    </style>
-
-
-    <style name="AppBaseTheme" parent="android:Theme.Light">
-        <!--
-          Theme customizations available in newer API levels can go in
-          res/values-vXX/styles.xml, while customizations related to
-          backward-compatibility can go here.
-
-        -->
-    </style>
-
 
 
     <!-- —————————————————————————————————— 共用部分代码 Start ———————————————————————————————————— -->
@@ -83,7 +49,7 @@
     <style name="style_common_layout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:background">@color/CAE3ED</item>
+        <item name="android:background">@color/color_white</item>
         <item name="android:orientation">vertical</item>
     </style>
 
@@ -173,7 +139,7 @@
     <style name="style_title">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/dp_40</item>
-        <item name="android:background">@color/color_title</item>
+        <item name="android:background">@color/transparent</item>
     </style>
 
     <!--标题栏文字样式-->
@@ -199,27 +165,6 @@
 
     <!-- —————————————————————————————————— 共用部分代码 End———————————————————————————————————— -->
 
-    <!--项目信息子条目样式-->
-
-    <style name="style_item_project_info">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/sel_border_blr</item>
-        <item name="android:paddingLeft">@dimen/dp_10</item>
-        <item name="android:paddingRight">@dimen/dp_10</item>
-        <item name="android:paddingTop">@dimen/dp_10</item>
-        <item name="android:paddingBottom">@dimen/dp_10</item>
-    </style>
-
-    <!--项目信息子条目右侧字体-->
-
-    <style name="style_font_project_info" parent="style_font_gray">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:background">@color/transparent</item>
-        <item name="android:textSize">@dimen/sp_13</item>
-        <item name="android:gravity">right</item>
-    </style>
-
     <!--创建项目页面的布局展示-->
 
     <style name="style_create_project_layout">
@@ -235,36 +180,18 @@
         <item name="android:layout_marginStart">@dimen/dp_16</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:textSize">@dimen/sp_16</item>
-        <item name="android:textColor">@color/text_black</item>
+        <item name="android:textColor">@color/font_black</item>
     </style>
 
     <!--创建项目页面输入框的样式-->
 
     <style name="style_create_project_edit" parent="style_common_edit">
         <item name="android:gravity">center_vertical</item>
-        <item name="android:background">@color/transparent</item>
     </style>
 
 
-
-    <style name="dialog_notify_animation" mce_bogus="1" parent="android:Animation">
+    <style name="style_dialog_notify_animation" mce_bogus="1" parent="android:Animation">
         <item name="android:windowEnterAnimation">@anim/notify_in</item>
         <item name="android:windowExitAnimation">@anim/notify_outn</item>
     </style>
-
-    <!--消息提醒列表文字样式-->
-
-    <style name="style_font_msg_remind" parent="style_font_black">
-        <item name="android:drawablePadding">@dimen/dp_5</item>
-        <item name="android:layout_marginTop">@dimen/dp_5</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="style_font_cargo_set" parent="style_font_gray">
-        <item name="android:layout_width">@dimen/dp_240</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_alignParentEnd">true</item>
-    </style>
-
-
 </resources>

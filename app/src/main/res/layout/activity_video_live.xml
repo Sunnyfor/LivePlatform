@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -7,7 +8,7 @@
         android:id="@+id/view1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000000" />
+        android:background="@color/color_line" />
 
     <com.starrtc.starrtcsdk.core.player.StarWhitePanel
         android:id="@+id/painter"
@@ -32,7 +33,7 @@
                 android:layout_weight="1" />
 
             <ListView
-                android:id="@+id/msg_list"
+                android:id="@+id/list_msg"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginRight="150dp"
@@ -50,37 +51,32 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/id_input"
+                android:id="@+id/et_input"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="30dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/sel_border"
+                android:background="@drawable/sel_live_input"
                 android:gravity="center_vertical"
                 android:hint="来聊吧~"
                 android:paddingLeft="10dp"
                 android:textSize="@dimen/text_size_small" />
 
-
             <TextView
-                android:id="@+id/send_btn"
+                android:id="@+id/iv_send_btn"
+                style="@style/style_common_btn_small"
                 android:layout_width="60dp"
-                android:layout_height="40dp"
-                android:background="@drawable/sel_btn_able"
-                android:gravity="center"
-                android:text="发送"
-                android:textColor="#ffffff"
-                android:textSize="16sp" />
+                android:text="发送" />
 
             <ImageView
-                android:id="@+id/mic_btn"
+                android:id="@+id/iv_mic_btn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginLeft="5dp"
                 android:src="@drawable/sel_link_mic" />
 
             <ImageView
-                android:id="@+id/switch_camera"
+                android:id="@+id/iv_switch_camera"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginLeft="5dp"
@@ -88,43 +84,38 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/live_id_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#88ffffff" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/live_id_text"
+        style="@style/style_font_black"
+        android:padding="@dimen/dp_5"
+        android:textSize="@dimen/sp_10"
+        android:layout_centerHorizontal="true"
+        tools:text="直播号：JoannChen" />
 
     <ImageView
-        android:id="@+id/back_btn"
+        android:id="@+id/iv_back_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_margin="10dp"
         android:background="@drawable/icon_btn_back_white" />
 
     <ImageView
-        android:id="@+id/panel_btn"
+        android:id="@+id/iv_panel_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="60dp"
         android:background="@drawable/sel_btn_panel" />
 
     <ImageView
-        android:id="@+id/clean_btn"
+        android:id="@+id/iv_clean_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="60dp"
+        android:layout_marginEnd="60dp"
         android:layout_marginBottom="60dp"
         android:background="@drawable/icon_btn_ersaer"
         android:visibility="invisible" />

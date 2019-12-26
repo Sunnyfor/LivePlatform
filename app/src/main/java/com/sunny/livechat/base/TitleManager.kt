@@ -2,7 +2,7 @@ package com.sunny.livechat.base
 
 import android.view.View
 import com.sunny.livechat.R
-import kotlinx.android.synthetic.main.act_base.*
+import kotlinx.android.synthetic.main.activity_base.*
 import kotlinx.android.synthetic.main.layout_title.view.*
 
 /**

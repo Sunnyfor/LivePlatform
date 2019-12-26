@@ -1,83 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#1296db</color>
-    <color name="colorPrimaryDark">#1296db</color>
-    <color name="colorAccent">#1296db</color>
-    <color name="color_theme">#2A90FC</color>
+    <color name="color_theme">#D4AEB5</color>
+    <color name="colorPrimary">@color/color_theme</color>
+    <color name="colorPrimaryDark">@color/color_theme</color>
+    <color name="colorAccent">@color/color_theme</color>
+
     <color name="transparent">#00000000</color>
 
-    <color name="color_title">#00000000</color>
 
+    <!--字体色-->
     <color name="font_black">#404040</color>
     <color name="font_white">#ffffff</color>
     <color name="font_gray">#818181</color>
     <color name="font_red">#DA3E3E</color>
 
     <color name="color_gray">#e8e8e8</color>
-    <color name="color_line">#d9d9d9</color>
-    <color name="color_border">#d9d9d9</color>
-    <color name="color_layout">#CAE3ED</color>
-
     <color name="color_black">#000000</color>
     <color name="color_white">#FFFFFF</color>
+    <color name="color_line">#d9d9d9</color>
+    <color name="color_layout">#CAE3ED</color>
 
-    <color name="btn_pressed_color">#C42F67F3</color>
-    <color name="btn_unpressed_color">#5677fc</color>
+    <!--按钮可点击色 / 不可点击色-->
+    <color name="btn_able_color">@color/color_theme</color>
     <color name="btn_disable_color">#949AA5</color>
+
+    <!--背景色-->
     <color name="bg_bubble_left">#EEEDED</color>
     <color name="bg_bubble_right">#FF9A50</color>
-
-    <!--                                                            -->
-
-    <color name="color">#CAE3ED</color>
-
-    <color name="colorPrimary_night">#3b3b3b</color>
-    <color name="colorPrimaryDark_night">#383838</color>
-    <color name="colorAccent_night">#a72b55</color>
-    <color name="textColor">#FF000000</color>
-    <color name="backgroundColorWhite">#FFFFFF</color>
-    <color name="colorRed">#f00</color>
-    <color name="colorblack">#A8A8A8</color>
-    <color name="color_000000">#000000</color>
-    <color name="color_7b8187">#7b8187</color>
-    <color name="f891b8">#F891B8</color>
-    <color name="F062CCF8">#F062CCF8</color>
-    <color name="C8242424">#C8242424</color>
-    <color name="CAE3ED">#CAE3ED</color>
-    <color name="myred">#eb4f38</color>
-    <color name="darkgray">#cccc</color>
-    <color name="btn_press_color">#5677fc</color>
-    <color name="Light_gray">#EEEDED</color>
-    <color name="ooccff">#00ccff</color>
-    <color name="Light_purple">#6633ff</color>
-    <color name="ff3366">#ff3366</color>
-    <color name="cc0099">#cc0099</color>
-    <color name="_00cc66">#00cc66</color>
-    <color name="color_hui">#BCC2CC</color>
-
-    <color name="primary">#3F51B5</color>
-    <color name="primaryDark">#303F9F</color>
-
-
-    <!-- 其它背景色或分割线相关 -->
-    <color name="bg_content">#f3f3f3</color>
-    <color name="divider_line">#d9d9d9</color>
-
-    <!-- 字体色 -->
-    <color name="text_title">#1b1b1b</color>
-    <color name="text_content">#818181</color>
-    <color name="text_sub">#919191</color>
-    <color name="text_hint">#c7c7c7</color>
-    <color name="text_black">#404040</color>
+    <color name="bg_live_input">#6BD4AEB5</color>
 
     <!--流式标签-->
     <color name="flow_layout_label_default">#949AA5</color>
     <color name="flow_layout_label_default_alpha">#14949AA5</color>
-
-    <color name="flow_layout_label_project">#00B7D6</color>
-    <color name="flow_layout_label_project_alpha">#1400B7D6</color>
-    <color name="flow_layout_label_task">#EB5D48</color>
-    <color name="flow_layout_label_task_alpha">#14EB5D48</color>
 
     <color name="flow_layout_label_pink">#D4AEB5</color>
     <color name="flow_layout_label_pink_alpha">#14D4AEB5</color>

@@ -9,8 +9,6 @@ package com.sunny.livechat.constant
 object UrlConstant {
 
     const val host = "http://10.0.0.158:1081" //杜康直播
-//    const val host = "rtc.110zhuangbei.com" //杜康直播
-
 
     /**
      * 登录

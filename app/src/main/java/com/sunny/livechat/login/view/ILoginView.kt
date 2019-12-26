@@ -12,10 +12,6 @@ import com.sunny.livechat.login.bean.UserBean
 interface ILoginView : IBaseView {
 
     //登录结果回调
-    fun loginResult(model: UserBean)
+    fun loginResult(model: UserBean?)
 
-
-    fun passWordState(isShow: Boolean) {
-
-    }
 }

@@ -12,6 +12,7 @@ import android.widget.Toast
 import com.orhanobut.logger.Logger
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
+import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.live.LiveListActivity
 import com.sunny.livechat.login.bean.UserBean
 import com.sunny.livechat.login.presenter.LoginPresenter
@@ -92,20 +93,17 @@ class LoginActivity : BaseActivity(), ILoginView {
         }
     }
 
-    override fun loadData() {
+    override fun loadData() {}
 
-    }
-
-    override fun close() {
-
-    }
+    override fun close() {}
 
 
-    override fun loginResult(model: UserBean) {
+    override fun loginResult(model: UserBean?) {
         // 自动登录：保存帐号密码
         SpUtil.setString(SpKey.username, et_username.text.toString())
         SpUtil.setString(SpKey.password, et_password.text.toString())
 
+        MLOC.saveUserId(model?.userId.toString())
         startService(Intent(this, KeepLiveService::class.java))
         Logger.i("IM服务启动")
 
@@ -116,41 +114,42 @@ class LoginActivity : BaseActivity(), ILoginView {
 
     private var times = 0
     private val REQUEST_PHONE_PERMISSIONS = 0
+
     private fun checkPermission() {
         times++
         val permissionsList = ArrayList<String>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.ACCESS_NETWORK_STATE
                 )
             }
-            if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.READ_PHONE_STATE
                 )
             }
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
             }
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 )
             }
-            if (checkSelfPermission(Manifest.permission.CAMERA) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.CAMERA
                 )
             }
-            if (checkSelfPermission(Manifest.permission.BLUETOOTH) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.BLUETOOTH
                 )
             }
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) !== PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissionsList.add(
                     Manifest.permission.RECORD_AUDIO
                 )
@@ -166,7 +165,7 @@ class LoginActivity : BaseActivity(), ILoginView {
                         .setCancelable(true)
                         .setTitle("提示")
                         .setMessage("获取不到授权，APP将无法正常使用，请允许APP获取权限！")
-                        .setPositiveButton("确定") { arg0, arg1 ->
+                        .setPositiveButton("确定") { _, _ ->
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 requestPermissions(
                                     permissionsList.toTypedArray(),
@@ -177,16 +176,8 @@ class LoginActivity : BaseActivity(), ILoginView {
                             "取消"
                         ) { _, _ -> finish() }.show()
                 }
-            } else {
-                startService()
             }
-        } else {
-            startService()
         }
     }
 
-    private fun startService() {
-//        val intent = Intent(this@LoginActivity, KeepLiveService::class.java)
-//        startService(intent)
-    }
 }
