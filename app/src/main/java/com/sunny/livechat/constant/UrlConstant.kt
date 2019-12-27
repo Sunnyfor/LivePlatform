@@ -26,4 +26,14 @@ object UrlConstant {
      */
     const val GET_LIVE_ROOM_LIST_URL = "app/live/liveinfo/list"
 
+    /**
+     * 【直播】获取直播间信息
+     */
+    const val GET_LIVE_ROOM_INFO_URL = "app/live/liveinfo/getLiveInfoByCreatorId"
+
+    /**
+     * 【直播】获取直播平台的用户信息
+     */
+    const val GET_LIVE_USER_INFO_URL = "app/sys/user/getUserIdAndNameToList"
+
 }

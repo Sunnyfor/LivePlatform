@@ -86,10 +86,10 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/live_id_text"
+        android:id="@+id/iv_live_id"
         style="@style/style_font_black"
         android:layout_centerHorizontal="true"
-        android:padding="@dimen/dp_5"
+        android:padding="@dimen/dp_10"
         android:textSize="@dimen/sp_10"
         tools:text="直播号：JoannChen" />
 
@@ -97,7 +97,7 @@
         android:id="@+id/iv_back_btn"
         android:layout_width="@dimen/dp_40"
         android:layout_height="@dimen/dp_40"
-        android:layout_margin="@dimen/dp_10"
+        android:layout_margin="@dimen/dp_20"
         android:background="@drawable/icon_btn_back_white" />
 
     <ImageView

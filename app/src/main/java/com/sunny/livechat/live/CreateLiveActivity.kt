@@ -56,7 +56,9 @@ class CreateLiveActivity : BaseActivity() {
         }
     }
 
-    override fun loadData() {}
+    override fun loadData() {
+        getLiveRoomInfo()
+    }
 
     override fun close() {}
 
@@ -74,6 +76,25 @@ class CreateLiveActivity : BaseActivity() {
 
             Logger.i("图片的绝对地址:$path")
         }
+    }
+
+    /**
+     * 获取直播间信息
+     */
+    private fun getLiveRoomInfo() {
+
+        ApiManager.post(null, hashMapOf(), UrlConstant.GET_LIVE_ROOM_INFO_URL,
+            object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
+                override fun onSuccess(model: BaseModel<LiveListBean>) {
+                    model.requestResult({
+
+                    }, {})
+                }
+
+                override fun onFailed(code: String, msg: String) {
+                    ToastUtil.showInterfaceError(code, msg)
+                }
+            })
     }
 
     private fun doCreateLiveApi(json: String) {

@@ -1,7 +1,5 @@
 package com.sunny.livechat.login.bean
 
-import com.sunny.livechat.base.BaseModel
-
 /**
  * Desc 用户信息实体类
  * Author JoannChen
