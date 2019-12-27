@@ -2,6 +2,7 @@ package com.sunny.livechat.chat.database;
 
 import android.database.Cursor;
 
+import com.orhanobut.logger.Logger;
 import com.sunny.livechat.chat.AEvent;
 import com.sunny.livechat.chat.IChatListener;
 import com.sunny.livechat.chat.MLOC;
@@ -20,16 +21,15 @@ public class CoreDB implements IChatListener {
     public static final String HISTORY_TYPE_GROUP = "group";
 
 
-
     public static CoreDBManager coreDBM = new CoreDBManager();
 
-    public CoreDB(){
-        AEvent.removeListener(AEvent.AEVENT_RESET,this);
-        AEvent.addListener(AEvent.AEVENT_RESET,this);
-        MLOC.d(TEXTTAG,"reset DB:"+MLOC.userId);
-        coreDBM.initCoreDB(APP_DB_PATH +"databases/", MLOC.userId);
+    public CoreDB() {
+        AEvent.removeListener(AEvent.AEVENT_RESET, this);
+        AEvent.addListener(AEvent.AEVENT_RESET, this);
+        Logger.e("reset DB:" + MLOC.userId);
+        coreDBM.initCoreDB(APP_DB_PATH + "databases/", MLOC.userId);
         //历史表
-        coreDBM.execSQL("create table if not exists "+HISTORY_TABLE+"(" +
+        coreDBM.execSQL("create table if not exists " + HISTORY_TABLE + "(" +
                 "id INTEGER PRIMARY KEY," +
                 "type TEXT ," +
                 "conversationId TEXT ," +
@@ -39,7 +39,7 @@ public class CoreDB implements IChatListener {
                 "lastMsg TEXT," +
                 "lastTime TEXT)");
         //消息表
-        coreDBM.execSQL("create table if not exists "+MSG_TABLE+"(" +
+        coreDBM.execSQL("create table if not exists " + MSG_TABLE + "(" +
                 "id INTEGER PRIMARY KEY," +
                 "conversationId TEXT," +
                 "fromId TEXT," +
@@ -53,8 +53,8 @@ public class CoreDB implements IChatListener {
     public void dispatchEvent(String aEventID, boolean success, Object eventObj) {
 
         switch (aEventID) {
-            case AEvent.AEVENT_RESET : {
-                if(coreDBM != null){
+            case AEvent.AEVENT_RESET: {
+                if (coreDBM != null) {
                     coreDBM.close();
                 }
                 break;
@@ -64,8 +64,8 @@ public class CoreDB implements IChatListener {
     }
 
 
-    public List<HistoryBean> getHistory(String type){
-        Cursor cursor = coreDBM.rawQuery("select * from "+HISTORY_TABLE+" where type=? order by id desc",new String[]{type});
+    public List<HistoryBean> getHistory(String type) {
+        Cursor cursor = coreDBM.rawQuery("select * from " + HISTORY_TABLE + " where type=? order by id desc", new String[]{type});
         List<HistoryBean> list = new ArrayList<HistoryBean>();
         while (cursor != null && cursor.moveToNext()) {
             HistoryBean bean = new HistoryBean();
@@ -83,13 +83,13 @@ public class CoreDB implements IChatListener {
         return list;
     }
 
-    public void updateHistory(HistoryBean historyBean){
-        if(historyBean.getConversationId()==null||historyBean.getType()==null)return;
+    public void updateHistory(HistoryBean historyBean) {
+        if (historyBean.getConversationId() == null || historyBean.getType() == null) return;
         Cursor cursor = coreDBM.rawQuery("select * from " + HISTORY_TABLE + " where type=? and conversationId=?",
                 new String[]{historyBean.getType(), historyBean.getConversationId()});
-        if(cursor!=null&&cursor.moveToNext()){
-            if (cursor != null) cursor.close();
-            coreDBM.execSQL("UPDATE "+HISTORY_TABLE+" SET newMsg = ?," +
+        if (cursor != null && cursor.moveToNext()) {
+            cursor.close();
+            coreDBM.execSQL("UPDATE " + HISTORY_TABLE + " SET newMsg = ?," +
                             " lastMsg = ?," +
                             " lastTime = ?" +
                             " where type=? and conversationId=?",
@@ -100,65 +100,66 @@ public class CoreDB implements IChatListener {
         }
     }
 
-    public void addHistory(HistoryBean historyBean, Boolean hasRead){
-        if(historyBean.getConversationId()==null||historyBean.getType()==null)return;
+    public void addHistory(HistoryBean historyBean, Boolean hasRead) {
+        if (historyBean.getConversationId() == null || historyBean.getType() == null) return;
         Cursor cursor = coreDBM.rawQuery("select * from " + HISTORY_TABLE + " where type=? and conversationId=?",
                 new String[]{historyBean.getType(), historyBean.getConversationId()});
-        if(cursor!=null&&cursor.moveToNext()){
+        if (cursor != null && cursor.moveToNext()) {
             historyBean.setId(cursor.getInt(cursor.getColumnIndex("id")));
-            if(!hasRead){
-                historyBean.setNewMsgCount(cursor.getInt(cursor.getColumnIndex("newMsg"))+1);
-            }else{
+            if (!hasRead) {
+                historyBean.setNewMsgCount(cursor.getInt(cursor.getColumnIndex("newMsg")) + 1);
+            } else {
                 historyBean.setNewMsgCount(0);
             }
-            if (cursor != null) cursor.close();
-            coreDBM.execSQL("UPDATE "+HISTORY_TABLE+" SET newMsg = ?," +
-                    " lastMsg = ?," +
-                    " lastTime = ?" +
-                    " where type=? and conversationId=?",
+            cursor.close();
+            coreDBM.execSQL("UPDATE " + HISTORY_TABLE + " SET newMsg = ?," +
+                            " lastMsg = ?," +
+                            " lastTime = ?" +
+                            " where type=? and conversationId=?",
                     new Object[]{
                             historyBean.getNewMsgCount(), historyBean.getLastMsg(),
                             historyBean.getLastTime(),
                             historyBean.getType(), historyBean.getConversationId()});
-        }else{
-            if(hasRead){
+        } else {
+            if (hasRead) {
                 historyBean.setNewMsgCount(0);
             }
             coreDBM.execSQL("insert into " + HISTORY_TABLE + "(type,conversationId,newMsg,lastMsg,lastTime,groupName,groupCreaterId) values(?,?,?,?,?,?,?)",
                     new Object[]{historyBean.getType(), historyBean.getConversationId(),
                             historyBean.getNewMsgCount(), historyBean.getLastMsg(),
-                            historyBean.getLastTime(),historyBean.getGroupName(),
+                            historyBean.getLastTime(), historyBean.getGroupName(),
                             historyBean.getGroupCreaterId()});
         }
 
     }
 
-    public void removeHistory(HistoryBean historyBean){
-        if(historyBean.getConversationId()==null||historyBean.getType()==null)return;
+    public void removeHistory(HistoryBean historyBean) {
+        if (historyBean.getConversationId() == null || historyBean.getType() == null) return;
         coreDBM.rawQuery("delete from " + HISTORY_TABLE + " where type=? and conversationId=?",
                 new String[]{historyBean.getType(), historyBean.getConversationId()});
         coreDBM.rawQuery("delete from " + MSG_TABLE + " where conversationId=?", new String[]{historyBean.getConversationId()});
     }
 
-    public List<MessageBean> getMessageList(String conversationId){
+    public List<MessageBean> getMessageList(String conversationId) {
         List<MessageBean> list = new ArrayList<>();
         Cursor cursor = coreDBM.rawQuery("select * from " + MSG_TABLE + " where conversationId=? order by id desc limit 5", new String[]{conversationId});
-        while (cursor!=null&&cursor.moveToNext()){
+        while (cursor != null && cursor.moveToNext()) {
             MessageBean bean = new MessageBean();
             bean.setId(cursor.getInt(cursor.getColumnIndex("id")));
             bean.setConversationId(cursor.getString(cursor.getColumnIndex("conversationId")));
             bean.setFromId(cursor.getString(cursor.getColumnIndex("fromId")));
             bean.setMsg(cursor.getString(cursor.getColumnIndex("msg")));
             bean.setTime(cursor.getString(cursor.getColumnIndex("time")));
-            list.add(0,bean);
+            list.add(0, bean);
         }
         if (cursor != null) cursor.close();
         return list;
     }
-    public void setMessage(MessageBean messageBean){
-        coreDBM.execSQL("insert into "+MSG_TABLE+" (conversationId,fromId,msg,time) values(?,?,?,?)",
-                new Object[]{messageBean.getConversationId(),messageBean.getFromId(),
-                        messageBean.getMsg(),messageBean.getTime()});
+
+    public void setMessage(MessageBean messageBean) {
+        coreDBM.execSQL("insert into " + MSG_TABLE + " (conversationId,fromId,msg,time) values(?,?,?,?)",
+                new Object[]{messageBean.getConversationId(), messageBean.getFromId(),
+                        messageBean.getMsg(), messageBean.getTime()});
     }
 
 }

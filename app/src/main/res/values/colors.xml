@@ -13,6 +13,7 @@
     <color name="font_white">#ffffff</color>
     <color name="font_gray">#818181</color>
     <color name="font_red">#DA3E3E</color>
+    <color name="font_orange">#FFB901</color>
 
     <color name="color_gray">#e8e8e8</color>
     <color name="color_black">#000000</color>
@@ -28,6 +29,7 @@
     <color name="bg_bubble_left">#EEEDED</color>
     <color name="bg_bubble_right">#FF9A50</color>
     <color name="bg_live_input">#6BD4AEB5</color>
+    <color name="bg_live_msg">#66333333</color>
 
     <!--流式标签-->
     <color name="flow_layout_label_default">#949AA5</color>

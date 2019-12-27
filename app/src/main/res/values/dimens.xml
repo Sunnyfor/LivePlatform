@@ -397,9 +397,4 @@
     <dimen name="sp_39">39.0sp</dimen>
     <dimen name="sp_40">40.0sp</dimen>
 
-    <dimen name="text_size_biger">20sp</dimen>
-    <dimen name="text_size_title">18sp</dimen>
-    <dimen name="text_size_big">16sp</dimen>
-    <dimen name="text_size_nomarl">14sp</dimen>
-    <dimen name="text_size_small">12sp</dimen>
 </resources>

@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sunny.livechat.R;
 import com.sunny.livechat.chat.database.CoreDB;
@@ -27,8 +26,8 @@ import java.util.TimerTask;
 /**
  * Created by zhangjt on 2017/8/17.
  */
-
 public class MLOC {
+
     public static Context appContext;
     public static String userId = "";
 
@@ -87,65 +86,23 @@ public class MLOC {
         VOIP_SERVER_URL         = loadSharedData(context,"VOIP_SERVER_URL",VOIP_SERVER_URL);
         IM_SERVER_URL           = loadSharedData(context,"IM_SERVER_URL",IM_SERVER_URL);
         LIVE_SRC_SERVER_URL     = loadSharedData(context,"LIVE_SRC_SERVER_URL",LIVE_SRC_SERVER_URL);
-        LIVE_PROXY_SERVER_URL   =  loadSharedData(context,"LIVE_PROXY_SERVER_URL", LIVE_PROXY_SERVER_URL);
+        LIVE_PROXY_SERVER_URL   = loadSharedData(context,"LIVE_PROXY_SERVER_URL", LIVE_PROXY_SERVER_URL);
         LIVE_VDN_SERVER_URL     = loadSharedData(context,"LIVE_VDN_SERVER_URL",LIVE_VDN_SERVER_URL);
         CHATROOM_SERVER_URL     = loadSharedData(context,"CHATROOM_SERVER_URL", CHATROOM_SERVER_URL);
 
 
-        if(loadSharedData(context,"AEC_ENABLE", "0").equals("0")){
-            AEventCenterEnable = false;
-        }else{
-            AEventCenterEnable = true;
-        }
+        AEventCenterEnable = !loadSharedData(context, "AEC_ENABLE", "0").equals("0");
 
         IM_GROUP_LIST_URL   = loadSharedData(context,"IM_GROUP_LIST_URL",IM_GROUP_LIST_URL);
         IM_GROUP_INFO_URL   = loadSharedData(context,"IM_GROUP_INFO_URL",IM_GROUP_INFO_URL);
         LIST_SAVE_URL       = loadSharedData(context,"LIST_SAVE_URL",LIST_SAVE_URL);
-        LIST_DELETE_URL     =  loadSharedData(context,"LIST_DELETE_URL", LIST_DELETE_URL);
+        LIST_DELETE_URL     = loadSharedData(context,"LIST_DELETE_URL", LIST_DELETE_URL);
         LIST_QUERY_URL      = loadSharedData(context,"LIST_QUERY_URL",LIST_QUERY_URL);
     }
 
-    private static Boolean debug = true;
-    public static void setDebug(Boolean b){
-        debug = b;
-    }
-
-    public static void d(String tag,String msg){
-        if(debug){
-            Log.d("starSDK_demo_"+tag,msg);
-        }
-    }
 
     public static void e(String tag,String msg){
         Log.e("starSDK_demo_"+tag,msg);
-    }
-
-    private static Toast mToast;
-    public static void showMsg(String str){
-        try {
-            if (mToast != null) {
-                mToast.setText(str);
-                mToast.setDuration(Toast.LENGTH_SHORT);
-            } else {
-                mToast = Toast.makeText(appContext.getApplicationContext(), str, Toast.LENGTH_SHORT);
-            }
-            mToast.show();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-    public static void showMsg(Context context ,String str){
-        try {
-            if (mToast != null) {
-                mToast.setText(str);
-                mToast.setDuration(Toast.LENGTH_SHORT);
-            } else {
-                mToast = Toast.makeText(context.getApplicationContext(), str, Toast.LENGTH_SHORT);
-            }
-            mToast.show();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
     public static List<HistoryBean> getHistoryList(String type){
@@ -188,7 +145,7 @@ public class MLOC {
         }
     }
 
-    public static void saveSharedData(Context context,String key,String value){
+    public static void saveSharedData(Context context, String key, String value){
         SharedPreferences sp = context.getApplicationContext().getSharedPreferences("stardemo", Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(key, value);
@@ -200,10 +157,11 @@ public class MLOC {
         return sp.getString(key,"");
     }
 
-    public static String loadSharedData(Context context,String key,String defValue){
+    public static String loadSharedData(Context context, String key, String defValue){
         SharedPreferences sp = context.getApplicationContext().getSharedPreferences("stardemo", Activity.MODE_PRIVATE);
         return sp.getString(key,defValue);
     }
+
     public static void saveUserId(String id){
         MLOC.userId = id;
         MLOC.saveSharedData(appContext,"userId",MLOC.userId);

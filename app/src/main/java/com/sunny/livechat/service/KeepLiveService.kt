@@ -79,7 +79,7 @@ class KeepLiveService : Service(), IChatListener {
 
             override fun failed(errMsg: String) {
                 Logger.i("IM登录失败")
-                MLOC.showMsg(this@KeepLiveService, errMsg)
+                Logger.e(errMsg)
             }
         })
 

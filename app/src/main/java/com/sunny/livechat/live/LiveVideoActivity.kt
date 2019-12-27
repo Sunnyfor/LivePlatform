@@ -11,8 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.ListView
 import android.widget.RelativeLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.orhanobut.logger.Logger
 import com.starrtc.starrtcsdk.api.XHClient
 import com.starrtc.starrtcsdk.api.XHConstants
@@ -47,25 +47,42 @@ import org.json.JSONObject
  */
 class LiveVideoActivity : BaseActivity(), IChatListener {
 
+    /**
+     * true为竖屏，false为横屏
+     */
+    private var isPortraitScreen = true
+
+    /**
+     * true为主播，false为观众
+     */
     private var isUploader = false
 
     private var creatorId: String? = null
     private var liveCode: String? = null
     private var liveName: String? = null
-
     private var liveType: XHConstants.XHLiveType? = null
+
     private var liveManager: XHLiveManager? = null
+
     private var mPrivateMsgTargetId: String? = null
+
     private var starRTCAudioManager: StarRTCAudioManager? = null
-    private var isPortrait = true
+
     private var msgList = ArrayList<XHIMMessage>()
 
     private var mPlayerList = ArrayList<ViewPosition>()
+
     private var borderW = 0
     private var borderH = 0
 
-    private val mAdapter: LiveMsgListAdapter by lazy {
-        LiveMsgListAdapter(this, msgList)
+    private val liveMsgListAdapter: LiveMsgListAdapter by lazy {
+        LiveMsgListAdapter(msgList).apply {
+            this.setOnItemClickListener { _, i ->
+                val clickUserId = msgList[i].fromId
+//            val msgText = msgList[position].contentData
+                showManagerDialog(clickUserId)
+            }
+        }
     }
 
     override fun setLayout(): Int = R.layout.activity_video_live
@@ -78,7 +95,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         starRTCAudioManager?.start { _, _ -> }
 
         val dm = resources.displayMetrics
-        isPortrait = dm.heightPixels > dm.widthPixels
+        isPortraitScreen = dm.heightPixels > dm.widthPixels
 
         val liveInfoBean = intent.getSerializableExtra(IntentKey.objectBean) as LiveListBean.LiveInfoBean
         liveCode = liveInfoBean.liveCode
@@ -111,14 +128,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         borderW = DensityUtils.screenWidth(this)
         borderH = borderW / 3 * 4
 
-        list_msg.transcriptMode = ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL
-        list_msg.isStackFromBottom = true
-        list_msg.adapter = mAdapter
-        list_msg.setOnItemClickListener { _, _, position, _ ->
-            val clickUserId = msgList[position].fromId
-//            val msgText = msgList[position].contentData
-            showManagerDialog(clickUserId)
-        }
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.stackFromEnd = true
+        recyclerView.layoutManager = layoutManager
+        recyclerView.scrollToPosition(liveMsgListAdapter.itemCount - 1)
+        recyclerView.adapter = liveMsgListAdapter
 
         if (creatorId != null && creatorId == MLOC.userId) {
             if (liveCode == null) {
@@ -153,17 +167,17 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         when (v.id) {
             R.id.iv_back_btn -> onBackPressed()
             R.id.iv_switch_camera -> liveManager?.switchCamera()
-            R.id.iv_clean_btn -> painter.clean()
+            R.id.iv_clean_btn -> previewPlayer.clean()
             R.id.iv_mic_btn -> clickMicBtn()
             R.id.iv_panel_btn -> {
                 if (iv_panel_btn.isSelected) {
                     iv_panel_btn.isSelected = false
                     iv_clean_btn.visibility = View.INVISIBLE
-                    painter.pause()
+                    previewPlayer.pause()
                 } else {
                     iv_panel_btn.isSelected = true
                     iv_clean_btn.visibility = View.VISIBLE
-                    painter.publish(liveManager)
+                    previewPlayer.publish(liveManager)
                 }
             }
             R.id.iv_send_btn -> {
@@ -304,7 +318,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
     }
 
     private fun sendChatMsg(msg: String) {
-        Logger.d("XHLiveManager", "sendChatMsg $msg")
+        Logger.d("IM发送消息 $msg")
         if (TextUtils.isEmpty(mPrivateMsgTargetId)) {
             val imMessage = liveManager?.sendMessage(msg, null)
             imMessage?.let {
@@ -317,38 +331,42 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 msgList.add(it)
             }
         }
-        mAdapter.notifyDataSetChanged()
+        liveMsgListAdapter.notifyDataSetChanged()
         mPrivateMsgTargetId = ""
 
     }
 
 
+    /**
+     * 开始直播
+     */
     private fun startLive() {
-        //开始直播
         isUploader = true
         liveManager?.startLive(liveCode, object : IXHResultCallback {
             override fun success(data: Any) {
-                Logger.e("XHLiveManager", "startLive success $data")
+                Logger.e("IM直播开始 $data")
             }
 
             override fun failed(errMsg: String) {
-                Logger.e("XHLiveManager", "startLive failed $errMsg")
+                Logger.e("IM直播失败 $errMsg")
                 ToastUtil.show(errMsg)
                 stopAndFinish()
             }
         })
     }
 
+    /**
+     * 观众加入直播
+     */
     private fun joinLive() {
-        //观众加入直播
         isUploader = false
         liveManager?.watchLive(liveCode, object : IXHResultCallback {
             override fun success(data: Any) {
-                Logger.e("XHLiveManager", "watchLive success $data")
+                Logger.e("IM观众加入直播 $data")
             }
 
             override fun failed(errMsg: String) {
-                Logger.e("XHLiveManager", "watchLive failed $errMsg")
+                Logger.e("IM观众加入失败 $errMsg")
                 ToastUtil.show(errMsg)
                 stopAndFinish()
             }
@@ -357,7 +375,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
 
     override fun dispatchEvent(aEventID: String?, success: Boolean, eventObj: Any?) {
-        Logger.e("XHLiveManager", "dispatchEvent  $aEventID$eventObj")
+        Logger.e("IM dispatchEvent  $aEventID$eventObj")
         when (aEventID) {
             AEvent.AEVENT_LIVE_ADD_UPLOADER -> try {
                 val data = eventObj as JSONObject
@@ -437,12 +455,12 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
             AEvent.AEVENT_LIVE_REV_MSG -> {
                 val revMsg = eventObj as XHIMMessage
                 msgList.add(revMsg)
-                mAdapter.notifyDataSetChanged()
+                liveMsgListAdapter.notifyDataSetChanged()
             }
             AEvent.AEVENT_LIVE_REV_PRIVATE_MSG -> {
                 val revMsgPrivate = eventObj as XHIMMessage
                 msgList.add(revMsgPrivate)
-                mAdapter.notifyDataSetChanged()
+                liveMsgListAdapter.notifyDataSetChanged()
             }
             AEvent.AEVENT_LIVE_ERROR -> {
                 var errStr = eventObj as String
@@ -465,7 +483,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                     val jsonObject = eventObj as JSONObject
                     val tData = jsonObject.get("data") as ByteArray
                     val tUpid = jsonObject.getString("upId")
-                    painter.setPaintData(tData, tUpid)
+                    previewPlayer.setPaintData(tData, tUpid)
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
@@ -545,7 +563,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
 
     private fun resetLayout() {
-        if (isPortrait) {
+        if (isPortraitScreen) {
             portraitIsTrue()
         } else {
             portraitIsFalse()
