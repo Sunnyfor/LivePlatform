@@ -25,7 +25,7 @@ import com.sunny.livechat.chat.listener.*
  */
 class KeepLiveService : Service(), IChatListener {
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
@@ -39,39 +39,39 @@ class KeepLiveService : Service(), IChatListener {
         Logger.i("IM服务销毁")
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         initFree()
         return super.onStartCommand(intent, flags, startId)
     }
-
 
     //开放版SDK初始化
     private fun initFree() {
         Logger.i("IM初始化,UserID:" + MLOC.userId)
 
         val liveManager = XHClient.getInstance().getLiveManager(this)
-        liveManager.setRtcMediaType(XHConstants.XHRtcMediaTypeEnum.STAR_RTC_MEDIA_TYPE_VIDEO_AND_AUDIO)
-        liveManager.setRecorder(XHCameraRecorder())
-        liveManager.addListener(XHLiveManagerListener())
+        liveManager?.setRtcMediaType(XHConstants.XHRtcMediaTypeEnum.STAR_RTC_MEDIA_TYPE_VIDEO_AND_AUDIO)
+        liveManager?.setRecorder(XHCameraRecorder())
+        liveManager?.addListener(XHLiveManagerListener())
 
         val customConfig = XHCustomConfig.getInstance(this)
-        customConfig.chatroomServerUrl = MLOC.CHATROOM_SERVER_URL
-        customConfig.liveSrcServerUrl = MLOC.LIVE_SRC_SERVER_URL
-        customConfig.liveVdnServerUrl = MLOC.LIVE_VDN_SERVER_URL
-        customConfig.setImServerUrl(MLOC.IM_SERVER_URL)
-        customConfig.voipServerUrl = MLOC.VOIP_SERVER_URL
+        customConfig?.chatroomServerUrl = MLOC.CHATROOM_SERVER_URL
+        customConfig?.liveSrcServerUrl = MLOC.LIVE_SRC_SERVER_URL
+        customConfig?.liveVdnServerUrl = MLOC.LIVE_VDN_SERVER_URL
+        customConfig?.setImServerUrl(MLOC.IM_SERVER_URL)
+        customConfig?.voipServerUrl = MLOC.VOIP_SERVER_URL
+        customConfig?.initSDKForFreeWithoutAudioCheck(MLOC.userId, { errMsg, _ -> Logger.i("IM错误消息：$errMsg") }, Handler())
+        customConfig?.setDefConfigOpenGLESEnable(false)
 
-        customConfig.initSDKForFreeWithoutAudioCheck(MLOC.userId, { errMsg, _ -> Logger.i("IM错误消息：$errMsg") }, Handler())
-        customConfig.setDefConfigOpenGLESEnable(false)
+        val xhClient = XHClient.getInstance()
+        xhClient?.chatManager?.addListener(XHChatManagerListener())
+        xhClient?.groupManager?.addListener(XHGroupManagerListener())
+        xhClient?.voipManager?.addListener(XHVoipManagerListener())
+        xhClient?.voipP2PManager?.addListener(XHVoipP2PManagerListener())
+        xhClient?.loginManager?.addListener(XHLoginManagerListener())
 
-        XHClient.getInstance().chatManager.addListener(XHChatManagerListener())
-        XHClient.getInstance().groupManager.addListener(XHGroupManagerListener())
-        XHClient.getInstance().voipManager.addListener(XHVoipManagerListener())
-        XHClient.getInstance().voipP2PManager.addListener(XHVoipP2PManagerListener())
-        XHClient.getInstance().loginManager.addListener(XHLoginManagerListener())
         XHVideoSourceManager.getInstance().videoSourceCallback = DemoVideoSourceCallback()
 
-        XHClient.getInstance().loginManager.loginFree(object : IXHResultCallback {
+        xhClient?.loginManager?.loginFree(object : IXHResultCallback {
             override fun success(data: Any?) {
                 addListener()
                 Logger.i("IM登录成功")

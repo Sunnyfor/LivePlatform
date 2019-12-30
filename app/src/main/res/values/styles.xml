@@ -49,7 +49,6 @@
     <style name="style_common_layout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:background">@color/color_white</item>
         <item name="android:orientation">vertical</item>
     </style>
 
@@ -88,7 +87,7 @@
         <item name="android:paddingEnd">@dimen/dp_10</item>
         <item name="android:textSize">@dimen/sp_14</item>
         <item name="android:inputType">text</item>
-        <item name="android:lines">1</item>
+        <item name="android:maxLines">1</item>
     </style>
 
     <!--通用黑色字体-->

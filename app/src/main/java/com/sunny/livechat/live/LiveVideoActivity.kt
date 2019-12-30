@@ -64,19 +64,18 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
      */
     private var isRunning = false
 
+    private var borderW = 0
+    private var borderH = 0
+
     private var creatorId: String? = null
     private var liveCode: String? = null
     private var liveName: String? = null
     private var liveType: XHConstants.XHLiveType? = null
 
-    private var mPlayerList = ArrayList<ViewPosition>()
-
     private var msgList = ArrayList<XHIMMessage>()
+    private var playerList = ArrayList<ViewPosition>()
 
-    private var liveManager: XHLiveManager? = null
-
-    private var borderW = 0
-    private var borderH = 0
+    private lateinit var liveManager: XHLiveManager
 
     private var mPrivateMsgTargetId: String? = null
 
@@ -177,17 +176,17 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         when (v.id) {
             R.id.iv_back_btn -> onBackPressed()
             R.id.iv_switch_camera -> liveManager?.switchCamera()
-            R.id.iv_clean_btn -> previewPlayer.clean()
+            R.id.iv_clean_btn -> starWhitePanel.clean()
             R.id.iv_mic_btn -> clickMicBtn()
             R.id.iv_panel_btn -> {
                 if (iv_panel_btn.isSelected) {
                     iv_panel_btn.isSelected = false
                     iv_clean_btn.visibility = View.INVISIBLE
-                    previewPlayer.pause()
+                    starWhitePanel.pause()
                 } else {
                     iv_panel_btn.isSelected = true
                     iv_clean_btn.visibility = View.VISIBLE
-                    previewPlayer.publish(liveManager)
+                    starWhitePanel.publish(liveManager)
                 }
             }
             R.id.iv_send_btn -> {
@@ -312,7 +311,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                         val jsonObject = eventObj as JSONObject
                         val tData = jsonObject.get("data") as ByteArray
                         val tUpid = jsonObject.getString("upId")
-                        previewPlayer.setPaintData(tData, tUpid)
+                        starWhitePanel.setPaintData(tData, tUpid)
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
@@ -483,10 +482,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         newOne.userId = addUserID
         val player = StarPlayer(this)
         newOne.videoPlayer = player
-        mPlayerList.add(newOne)
+        playerList.add(newOne)
         view1.addView(player)
         val coverView = CircularCoverView(this)
-        coverView.layoutParams = RelativeLayout.LayoutParams(
+        coverView.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
@@ -498,7 +497,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         player.setZOrderMediaOverlay(true)
         player.setScalType(StarPlayerScaleType.DRAW_TYPE_CENTER)
 
-        if (mPlayerList.size == 1) {
+        if (playerList.size == 1) {
             liveManager?.attachPlayerView(addUserID, player, true)
         } else {
             liveManager?.attachPlayerView(addUserID, player, false)
@@ -507,14 +506,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
 
     private fun deletePlayer(removeUserId: String) {
-        if (mPlayerList.size > 0) {
-            for (i in mPlayerList.indices) {
-                val temp = mPlayerList[i]
+        if (playerList.size > 0) {
+            for (i in playerList.indices) {
+                val temp = playerList[i]
                 if (temp.userId.equals(removeUserId)) {
-                    val remove = mPlayerList.removeAt(i)
+                    val remove = playerList.removeAt(i)
                     view1.removeView(remove.videoPlayer)
                     resetLayout()
-                    liveManager?.changeToBig(mPlayerList[0].userId)
+                    liveManager?.changeToBig(playerList[0].userId)
                     break
                 }
             }
@@ -524,24 +523,24 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
     private fun changeLayout(v: View) {
         if (isRunning) return
-        if (v === mPlayerList[0].videoPlayer) return
+        if (v === playerList[0].videoPlayer) return
         var clickPlayer: ViewPosition? = null
         var clickIndex = 0
-        for (i in mPlayerList.indices) {
-            if (mPlayerList[i].videoPlayer === v) {
+        for (i in playerList.indices) {
+            if (playerList[i].videoPlayer === v) {
                 clickIndex = i
-                clickPlayer = mPlayerList.removeAt(i)
+                clickPlayer = playerList.removeAt(i)
                 liveManager?.changeToBig(clickPlayer.userId)
                 break
             }
         }
-        val mainPlayer = mPlayerList.removeAt(0)
+        val mainPlayer = playerList.removeAt(0)
         liveManager?.changeToSmall(mainPlayer.userId)
-        mPlayerList.remove(clickPlayer)
+        playerList.remove(clickPlayer)
         clickPlayer?.let {
-            mPlayerList.add(0, it)
+            playerList.add(0, it)
         }
-        mPlayerList.add(clickIndex, mainPlayer)
+        playerList.add(clickIndex, mainPlayer)
 
         val finalClickPlayer = clickPlayer
         startAnimation(finalClickPlayer?.videoPlayer, mainPlayer.videoPlayer)
@@ -558,24 +557,24 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
 
     private fun showPortraitScreen() {
-        when (mPlayerList.size) {
+        when (playerList.size) {
             1 -> {
-                val player = mPlayerList[0].videoPlayer
+                val player = playerList[0].videoPlayer
                 val lp = RelativeLayout.LayoutParams(borderW, borderH)
                 player?.layoutParams = lp
                 player?.y = 0f
                 player?.x = 0f
             }
             2, 3, 4 -> {
-                for (i in mPlayerList.indices) {
+                for (i in playerList.indices) {
                     if (i == 0) {
-                        val player = mPlayerList[i].videoPlayer
+                        val player = playerList[i].videoPlayer
                         val lp = RelativeLayout.LayoutParams(borderW / 3 * 2, borderH)
                         player?.layoutParams = lp
                         player?.y = 0f
                         player?.x = 0f
                     } else {
-                        val player = mPlayerList[i].videoPlayer
+                        val player = playerList[i].videoPlayer
                         val lp = RelativeLayout.LayoutParams(borderW / 3, borderH / 3)
                         player?.layoutParams = lp
                         player?.y = ((i - 1) * borderH / 3).toFloat()
@@ -584,10 +583,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 }
             }
             5, 6, 7 -> {
-                for (i in mPlayerList.indices) {
+                for (i in playerList.indices) {
                     when (i) {
                         0 -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(
                                 borderW - borderW / 3,
                                 borderH - borderH / 4
@@ -595,14 +594,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                             player?.layoutParams = lp
                         }
                         in 1..2 -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(borderW / 3, borderH / 4)
                             player?.layoutParams = lp
                             player?.x = (borderW - borderW / 3).toFloat()
                             player?.y = ((i - 1) * borderH / 4).toFloat()
                         }
                         else -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(borderW / 3, borderH / 4)
                             player?.layoutParams = lp
                             player?.x = ((i - 3) * borderW / 3).toFloat()
@@ -616,24 +615,24 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
 
     private fun showLandscapeScreen() {
-        when (mPlayerList.size) {
+        when (playerList.size) {
             1 -> {
-                val player = mPlayerList[0].videoPlayer
+                val player = playerList[0].videoPlayer
                 val lp = RelativeLayout.LayoutParams(borderW, borderH)
                 player?.layoutParams = lp
                 player?.y = 0f
                 player?.x = 0f
             }
             2, 3, 4 -> {
-                for (i in mPlayerList.indices) {
+                for (i in playerList.indices) {
                     if (i == 0) {
-                        val player = mPlayerList[i].videoPlayer
+                        val player = playerList[i].videoPlayer
                         val lp = RelativeLayout.LayoutParams(borderW / 4 * 3, borderH)
                         player?.layoutParams = lp
                         player?.y = 0f
                         player?.x = 0f
                     } else {
-                        val player = mPlayerList[i].videoPlayer
+                        val player = playerList[i].videoPlayer
                         val lp = RelativeLayout.LayoutParams(borderW / 4, borderH / 3)
                         player?.layoutParams = lp
                         player?.y = ((i - 1) * borderH / 3).toFloat()
@@ -643,24 +642,24 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 }
             }
             5, 6, 7 -> {
-                for (i in mPlayerList.indices) {
+                for (i in playerList.indices) {
                     when (i) {
                         0 -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(borderW / 4 * 2, borderH)
                             player?.layoutParams = lp
                             player?.y = 0f
                             player?.x = 0f
                         }
                         in 1..2 -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(borderW / 4, borderH / 3)
                             player?.layoutParams = lp
                             player?.y = ((i - 1) * borderH / 3).toFloat()
                             player?.x = (borderW / 4 * 2).toFloat()
                         }
                         else -> {
-                            val player = mPlayerList[i].videoPlayer
+                            val player = playerList[i].videoPlayer
                             val lp = RelativeLayout.LayoutParams(borderW / 4, borderH / 3)
                             player?.layoutParams = lp
                             player?.y = ((i - 3) * borderH / 3).toFloat()
@@ -679,7 +678,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
             if (creatorId == MLOC.userId) {
                 var ac = false
 
-                mPlayerList.forEach {
+                playerList.forEach {
                     if (userId == it.userId) {
                         ac = true
                         return@forEach

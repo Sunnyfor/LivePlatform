@@ -11,7 +11,7 @@
         android:background="@color/color_line" />
 
     <com.starrtc.starrtcsdk.core.player.StarWhitePanel
-        android:id="@+id/previewPlayer"
+        android:id="@+id/starWhitePanel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/transparent" />

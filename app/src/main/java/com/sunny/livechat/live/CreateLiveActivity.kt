@@ -10,6 +10,7 @@ import com.starrtc.starrtcsdk.api.XHClient
 import com.starrtc.starrtcsdk.api.XHConstants
 import com.starrtc.starrtcsdk.api.XHLiveItem
 import com.starrtc.starrtcsdk.apiInterface.IXHResultCallback
+import com.sunny.livechat.MyApplication
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
 import com.sunny.livechat.base.BaseModel
@@ -21,7 +22,9 @@ import com.sunny.livechat.live.bean.LiveListBean
 import com.sunny.livechat.util.GlideApp
 import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.URIUtil
+import com.sunny.livechat.util.intent.IntentKey
 import com.sunny.livechat.util.intent.IntentValue
+import com.sunny.livechat.util.sp.SpKey
 import kotlinx.android.synthetic.main.activity_live_create.*
 import org.greenrobot.eventbus.EventBus
 
@@ -37,7 +40,7 @@ class CreateLiveActivity : BaseActivity() {
 
     override fun setLayout(): Int = R.layout.activity_live_create
 
-    override fun initTitle(): View? = titleManager.defaultTitle("创建直播间")
+    override fun initTitle(): View? = titleManager.defaultTitle("摄像直播")
 
     override fun initView() {
         iv_live_cover.setOnClickListener(this)
@@ -46,7 +49,7 @@ class CreateLiveActivity : BaseActivity() {
 
     override fun onClickEvent(v: View) {
         when (v.id) {
-            R.id.btn_create -> doCreateLiveSDK()
+            R.id.btn_create -> modifyLiveRoomInfo()
             R.id.iv_live_cover -> {
                 val intent = Intent()
                 intent.type = "image/*"
@@ -84,10 +87,46 @@ class CreateLiveActivity : BaseActivity() {
     private fun getLiveRoomInfo() {
 
         ApiManager.post(null, hashMapOf(), UrlConstant.GET_LIVE_ROOM_INFO_URL,
-            object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
-                override fun onSuccess(model: BaseModel<LiveListBean>) {
+            object : ApiManager.OnResult<BaseModel<LiveListBean.LiveInfoBean>>() {
+                override fun onSuccess(model: BaseModel<LiveListBean.LiveInfoBean>) {
                     model.requestResult({
+                        liveInfoBean = model.data ?: return@requestResult
+                        if (MLOC.userId == model.data?.creator) {
+                            btn_create.text = "开始直播"
+                            et_live_name.setText(model.data?.liveName)
+                            et_live_notice.setText(model.data?.liveNotice)
+                            et_live_name.setSelection(et_live_name.text.toString().length)
+                        } else {
+                            btn_create.text = "创建直播"
+                        }
+                    }, {})
+                }
 
+                override fun onFailed(code: String, msg: String) {
+                    ToastUtil.showInterfaceError(code, msg)
+                }
+            })
+    }
+
+    /**
+     * 修改直播间信息
+     */
+    private fun modifyLiveRoomInfo() {
+
+        liveInfoBean.liveName = et_live_name.text.toString()
+        liveInfoBean.liveNotice = et_live_notice.text.toString()
+
+        val json = Gson().toJson(liveInfoBean)
+
+        ApiManager.postJson(null, json.toString(), UrlConstant.SET_LIVE_ROOM_INFO_URL,
+            object : ApiManager.OnResult<BaseModel<LiveListBean.LiveInfoBean>>() {
+                override fun onSuccess(model: BaseModel<LiveListBean.LiveInfoBean>) {
+                    model.requestResult({
+                        MyApplication.getInstance().putData(SpKey.liveInfoBean, liveInfoBean)
+                        val intent = Intent(this@CreateLiveActivity, StartLiveActivity::class.java)
+                        intent.putExtra(IntentKey.liveName, et_live_name.text.toString())
+                        startActivity(intent)
+                        finish()
                     }, {})
                 }
 

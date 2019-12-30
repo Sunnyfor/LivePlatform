@@ -54,6 +54,16 @@ object UrlConstant {
     const val GET_LIVE_ROOM_INFO_URL = "app/live/liveinfo/getLiveInfoByCreatorId"
 
     /**
+     * 【直播】修改直播间信息
+     */
+    const val SET_LIVE_ROOM_INFO_URL = "app/live/liveinfo/update"
+
+    /**
+     * 【直播】上传图片
+     */
+    const val UPLOAD_IMAGE_URL = "app//sys/sysfujian/upload"
+
+    /**
      * 【直播】获取直播平台的用户信息
      */
     const val GET_LIVE_USER_INFO_URL = "app/sys/user/getUserIdAndNameToList"

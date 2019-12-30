@@ -3,6 +3,7 @@ package com.sunny.livechat.live
 import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.sunny.livechat.MyApplication
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
 import com.sunny.livechat.base.BaseModel
@@ -12,7 +13,7 @@ import com.sunny.livechat.http.ApiManager
 import com.sunny.livechat.live.adapter.LiveListAdapter
 import com.sunny.livechat.live.bean.LiveListBean
 import com.sunny.livechat.util.ToastUtil
-import com.sunny.livechat.util.intent.IntentKey
+import com.sunny.livechat.util.sp.SpKey
 import kotlinx.android.synthetic.main.activity_live_list.*
 import kotlinx.android.synthetic.main.layout_list.*
 import org.greenrobot.eventbus.EventBus
@@ -32,17 +33,16 @@ class LiveListActivity : BaseActivity() {
     private val liveListAdapter: LiveListAdapter by lazy {
         LiveListAdapter(list).apply {
             this.setOnItemClickListener { _, position ->
-                val intent = Intent(this@LiveListActivity, LiveVideoActivity::class.java)
-                intent.putExtra(IntentKey.objectBean, liveListAdapter.getData(position))
-                startActivity(intent)
+                MyApplication.getInstance().putData(SpKey.liveInfoBean, liveListAdapter.getData(position))
+                startActivity(Intent(this@LiveListActivity, VideoLiveActivity::class.java))
             }
         }
     }
 
     override fun setLayout(): Int = R.layout.activity_live_list
 
-    override fun initTitle(): View = titleManager.rightTitle("直播大厅","设置"){
-        startActivity(Intent(this,HostSetActivity::class.java))
+    override fun initTitle(): View = titleManager.rightTitle("直播大厅", "设置") {
+        startActivity(Intent(this, HostSetActivity::class.java))
     }
 
     override fun initView() {

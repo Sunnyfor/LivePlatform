@@ -8,13 +8,11 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,6 +20,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.orhanobut.logger.Logger;
 import com.starrtc.starrtcsdk.api.XHClient;
 import com.starrtc.starrtcsdk.api.XHConstants;
 import com.starrtc.starrtcsdk.api.XHCustomConfig;
@@ -32,6 +31,7 @@ import com.starrtc.starrtcsdk.core.im.message.XHIMMessage;
 import com.starrtc.starrtcsdk.core.player.StarPlayer;
 import com.starrtc.starrtcsdk.core.player.StarPlayerScaleType;
 import com.starrtc.starrtcsdk.core.player.StarWhitePanel;
+import com.sunny.livechat.MyApplication;
 import com.sunny.livechat.R;
 import com.sunny.livechat.base.BaseActivity;
 import com.sunny.livechat.chat.AEvent;
@@ -41,7 +41,8 @@ import com.sunny.livechat.live.adapter.LiveMsgListAdapter;
 import com.sunny.livechat.live.bean.LiveListBean;
 import com.sunny.livechat.live.bean.ViewPosition;
 import com.sunny.livechat.util.DensityUtils;
-import com.sunny.livechat.util.intent.IntentKey;
+import com.sunny.livechat.util.ToastUtil;
+import com.sunny.livechat.util.sp.SpKey;
 import com.sunny.livechat.widget.CircularCoverView;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,41 +51,50 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
-    private TextView vRoomId;
-    private RecyclerView recyclerView;
-    private View vSendBtn;
+    /**
+     * true为竖屏，false为横屏
+     */
+    private Boolean isPortraitScreen = true;
+
+    /**
+     * true为主播，false为观众
+     */
+    private Boolean isUploader = false;
+
+    /**
+     * true为正在直播
+     */
+    private Boolean isRunning = false;
+
+    private int borderW = 0;
+    private int borderH = 0;
+
+    private String creatorId;
+    private String liveCode;
+
+    private ArrayList<XHIMMessage> msgList;
+    private ArrayList<ViewPosition> playerList;
+
+    private XHLiveManager liveManager;
+
+    private StarRTCAudioManager starRTCAudioManager;
+
+    private LiveMsgListAdapter liveMsgListAdapter;
+
+    private String mPrivateMsgTargetId;
+
+    private StarWhitePanel vPaintPlayer;
+    private RelativeLayout vPlayerView;
     private EditText vEditText;
     private View vMicBtn;
     private View vCameraBtn;
     private View vPanelBtn;
     private View vCleanBtn;
 
-    private ArrayList<XHIMMessage> msgList;
-
-    private RelativeLayout vPlayerView;
-    private ArrayList<ViewPosition> mPlayerList;
-    private int borderW = 0;
-    private int borderH = 0;
-
-    private String mPrivateMsgTargetId;
-    private XHLiveManager liveManager;
-    private Boolean isUploader = false;
-    private String createrId;
-    private String liveId;
-    private String liveName;
-    private XHConstants.XHLiveType liveType;
-
-    private StarWhitePanel vPaintPlayer;
-
-    private Boolean isPortrait = true;
-
-    private StarRTCAudioManager starRTCAudioManager;
-    private LiveMsgListAdapter liveMsgListAdapter;
 
     @Override
     public int setLayout() {
@@ -97,74 +107,44 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         return null;
     }
 
-
-    @Override
-    public void onClickEvent(@NotNull View v) {
-
-    }
-
-    @Override
-    public void loadData() {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
     @Override
     public void initView() {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE |
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_video_live);
 
         starRTCAudioManager = StarRTCAudioManager.create(this);
         starRTCAudioManager.start(new StarRTCAudioManager.AudioManagerEvents() {
             @Override
             public void onAudioDeviceChanged(StarRTCAudioManager.AudioDevice selectedAudioDevice, Set availableAudioDevices) {
-
+                Logger.i("IM语音开启");
             }
         });
 
         DisplayMetrics dm = getResources().getDisplayMetrics();
-        isPortrait = dm.heightPixels > dm.widthPixels;
+        isPortraitScreen = dm.heightPixels > dm.widthPixels;
 
-        LiveListBean.LiveInfoBean liveInfoBean = (LiveListBean.LiveInfoBean) getIntent().getSerializableExtra(IntentKey.objectBean);
-        liveId = liveInfoBean.getLiveCode();
-        liveName = liveInfoBean.getLiveName();
-        createrId = liveInfoBean.getCreator();
-        liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic; //后期改成接口调用：liveInfoBean.liveClassId
+        LiveListBean.LiveInfoBean liveInfoBean = MyApplication.Companion.getInstance().getData(SpKey.liveInfoBean);
+        String liveName = liveInfoBean.getLiveName();
+        liveCode = liveInfoBean.getLiveCode();
+        creatorId = liveInfoBean.getCreator();
+        XHConstants.XHLiveType liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic; //后期改成接口调用：liveInfoBean.liveClassId
 
-        if (TextUtils.isEmpty(liveId)) {
-            if (createrId.equals(MLOC.userId)) {
-                if (TextUtils.isEmpty(liveName) || liveType == null) {
-                    stopAndFinish();
-                    return;
-                }
-            } else {
-                if (TextUtils.isEmpty(liveName) || liveType == null) {
-                    stopAndFinish();
-                    return;
-                }
-            }
+        if (TextUtils.isEmpty(liveCode) || TextUtils.isEmpty(liveName)) {
+            ToastUtil.INSTANCE.show("没有直播信息");
+            stopAndFinish();
+            return;
         }
 
         liveManager = XHClient.getInstance().getLiveManager(this);
-//        liveManager.setRtcMediaType(XHConstants.XHRtcMediaTypeEnum.STAR_RTC_MEDIA_TYPE_VIDEO_AND_AUDIO);
-//        liveManager.setRecorder(new XHCameraRecorder());
-//        liveManager.addListener(new XHLiveManagerListener());
-
 
         addListener();
-        vRoomId = (TextView) findViewById(R.id.iv_live_id);
-        vRoomId.setText("直播编号：" + liveName);
+        TextView vRoomId = findViewById(R.id.iv_live_id);
+        vRoomId.setText(("直播编号：" + liveName));
 
-        vPaintPlayer = (StarWhitePanel) findViewById(R.id.starWhitePanel);
+        vPaintPlayer = findViewById(R.id.starWhitePanel);
         vPanelBtn = findViewById(R.id.iv_panel_btn);
         vCleanBtn = findViewById(R.id.iv_clean_btn);
 
@@ -174,17 +154,18 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 onBackPressed();
             }
         });
+
         vEditText = findViewById(R.id.et_input);
         vEditText.clearFocus();
+
         msgList = new ArrayList<>();
-        recyclerView = findViewById(R.id.recyclerView);
-        LinearLayoutManager lm = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(lm);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         liveMsgListAdapter = new LiveMsgListAdapter(msgList);
         recyclerView.setAdapter(liveMsgListAdapter);
 
-        vSendBtn = findViewById(R.id.iv_send_btn);
+        View vSendBtn = findViewById(R.id.iv_send_btn);
         vSendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,16 +181,14 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
         vCameraBtn = findViewById(R.id.iv_switch_camera);
         vMicBtn = findViewById(R.id.iv_mic_btn);
-        if (createrId != null && createrId.equals(MLOC.userId)) {
+        if (creatorId != null && creatorId.equals(MLOC.userId)) {
             vMicBtn.setVisibility(View.GONE);
             vCameraBtn.setVisibility(View.VISIBLE);
             vPanelBtn.setVisibility(View.VISIBLE);
-//            vCarBtn.setVisibility(View.VISIBLE);
         } else {
             vMicBtn.setVisibility(View.VISIBLE);
             vCameraBtn.setVisibility(View.GONE);
             vPanelBtn.setVisibility(View.GONE);
-//            vCarBtn.setVisibility(View.GONE);
         }
         vMicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -240,7 +219,6 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                                     vMicBtn.setSelected(false);
                                     vCameraBtn.setVisibility(View.GONE);
                                     vPanelBtn.setVisibility(View.GONE);
-//                                            vCarBtn.setVisibility(View.GONE);
                                 }
                             }
                     ).show();
@@ -255,7 +233,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                             }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface arg0, int arg1) {
-                                    liveManager.applyToBroadcaster(createrId);
+                                    liveManager.applyToBroadcaster(creatorId);
                                 }
                             }
                     ).show();
@@ -270,10 +248,10 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
             }
         });
 
-        vPlayerView = (RelativeLayout) findViewById(R.id.view1);
+        vPlayerView = findViewById(R.id.view1);
         borderW = DensityUtils.screenWidth(this);
         borderH = borderW / 3 * 4;
-        mPlayerList = new ArrayList<>();
+        playerList = new ArrayList<>();
 
 
         vPanelBtn.setOnClickListener(new View.OnClickListener() {
@@ -300,11 +278,24 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         init();
     }
 
+    @Override
+    public void onClickEvent(@NotNull View v) {
+    }
+
+    @Override
+    public void loadData() {
+
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+
     private void init() {
-        if (createrId.equals(MLOC.userId)) {
-
+        if (creatorId.equals(MLOC.userId)) {
             starLive();
-
         } else {
             joinLive();
         }
@@ -314,7 +305,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     private void starLive() {
         //开始直播
         isUploader = true;
-        liveManager.startLive(liveId, new IXHResultCallback() {
+        liveManager.startLive(liveCode, new IXHResultCallback() {
             @Override
             public void success(Object data) {
             }
@@ -329,7 +320,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     private void joinLive() {
         //观众加入直播
         isUploader = false;
-        liveManager.watchLive(liveId, new IXHResultCallback() {
+        liveManager.watchLive(liveCode, new IXHResultCallback() {
             @Override
             public void success(Object data) {
             }
@@ -450,7 +441,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         newOne.setUserId(addUserID);
         StarPlayer player = new StarPlayer(this);
         newOne.setVideoPlayer(player);
-        mPlayerList.add(newOne);
+        playerList.add(newOne);
         vPlayerView.addView(player);
         CircularCoverView coverView = new CircularCoverView(this);
         coverView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -467,33 +458,31 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         player.setZOrderMediaOverlay(true);
         player.setScalType(StarPlayerScaleType.DRAW_TYPE_CENTER);
 
-        if (mPlayerList.size() == 1) {
+        if (playerList.size() == 1) {
             liveManager.attachPlayerView(addUserID, player, true);
         } else {
             liveManager.attachPlayerView(addUserID, player, false);
         }
     }
 
-    private boolean isRuning = false;
-
     private void changeLayout(View v) {
-        if (isRuning) return;
-        if (v == mPlayerList.get(0).getVideoPlayer()) return;
+        if (isRunning) return;
+        if (v == playerList.get(0).getVideoPlayer()) return;
         ViewPosition clickPlayer = null;
         int clickIndex = 0;
-        for (int i = 0; i < mPlayerList.size(); i++) {
-            if (mPlayerList.get(i).getVideoPlayer() == v) {
+        for (int i = 0; i < playerList.size(); i++) {
+            if (playerList.get(i).getVideoPlayer() == v) {
                 clickIndex = i;
-                clickPlayer = mPlayerList.remove(i);
+                clickPlayer = playerList.remove(i);
                 liveManager.changeToBig(clickPlayer.getUserId());
                 break;
             }
         }
-        final ViewPosition mainPlayer = mPlayerList.remove(0);
+        final ViewPosition mainPlayer = playerList.remove(0);
         liveManager.changeToSmall(mainPlayer.getUserId());
-        mPlayerList.remove(clickPlayer);
-        mPlayerList.add(0, clickPlayer);
-        mPlayerList.add(clickIndex, mainPlayer);
+        playerList.remove(clickPlayer);
+        playerList.add(0, clickPlayer);
+        playerList.add(clickIndex, mainPlayer);
 
         final ViewPosition finalClickPlayer = clickPlayer;
         startAnimation(finalClickPlayer.getVideoPlayer(), mainPlayer.getVideoPlayer());
@@ -555,19 +544,19 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
             valTotal.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    isRuning = true;
+                    isRunning = true;
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    isRuning = false;
+                    isRunning = false;
                     clickPlayer.setScalType(StarPlayerScaleType.DRAW_TYPE_CENTER);
                     mainPlayer.setScalType(StarPlayerScaleType.DRAW_TYPE_CENTER);
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
-                    isRuning = false;
+                    isRunning = false;
                 }
 
                 @Override
@@ -581,14 +570,14 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
 
     private void deletePlayer(String removeUserId) {
-        if (mPlayerList != null && mPlayerList.size() > 0) {
-            for (int i = 0; i < mPlayerList.size(); i++) {
-                ViewPosition temp = mPlayerList.get(i);
+        if (playerList != null && playerList.size() > 0) {
+            for (int i = 0; i < playerList.size(); i++) {
+                ViewPosition temp = playerList.get(i);
                 if (temp.getUserId().equals(removeUserId)) {
-                    ViewPosition remove = mPlayerList.remove(i);
+                    ViewPosition remove = playerList.remove(i);
                     vPlayerView.removeView(remove.getVideoPlayer());
                     resetLayout();
-                    liveManager.changeToBig(mPlayerList.get(0).getUserId());
+                    liveManager.changeToBig(playerList.get(0).getUserId());
                     break;
                 }
             }
@@ -596,10 +585,10 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     }
 
     private void resetLayout() {
-        if (isPortrait) {
-            switch (mPlayerList.size()) {
+        if (isPortraitScreen) {
+            switch (playerList.size()) {
                 case 1: {
-                    StarPlayer player = mPlayerList.get(0).getVideoPlayer();
+                    StarPlayer player = playerList.get(0).getVideoPlayer();
                     RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW, borderH);
                     player.setLayoutParams(lp);
                     player.setY(0);
@@ -609,15 +598,15 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 case 2:
                 case 3:
                 case 4: {
-                    for (int i = 0; i < mPlayerList.size(); i++) {
+                    for (int i = 0; i < playerList.size(); i++) {
                         if (i == 0) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 3 * 2, borderH);
                             player.setLayoutParams(lp);
                             player.setY(0);
                             player.setX(0);
                         } else {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 3, borderH / 3);
                             player.setLayoutParams(lp);
                             player.setY((i - 1) * borderH / 3);
@@ -629,19 +618,19 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 case 5:
                 case 6:
                 case 7: {
-                    for (int i = 0; i < mPlayerList.size(); i++) {
+                    for (int i = 0; i < playerList.size(); i++) {
                         if (i == 0) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW - borderW / 3, borderH - borderH / 4);
                             player.setLayoutParams(lp);
                         } else if (i > 0 && i < 3) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 3, borderH / 4);
                             player.setLayoutParams(lp);
                             player.setX(borderW - borderW / 3);
                             player.setY((i - 1) * borderH / 4);
                         } else {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 3, borderH / 4);
                             player.setLayoutParams(lp);
                             player.setX((i - 3) * borderW / 3);
@@ -652,9 +641,9 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 }
             }
         } else {
-            switch (mPlayerList.size()) {
+            switch (playerList.size()) {
                 case 1: {
-                    StarPlayer player = mPlayerList.get(0).getVideoPlayer();
+                    StarPlayer player = playerList.get(0).getVideoPlayer();
                     RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW, borderH);
                     player.setLayoutParams(lp);
                     player.setY(0);
@@ -664,15 +653,15 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 case 2:
                 case 3:
                 case 4: {
-                    for (int i = 0; i < mPlayerList.size(); i++) {
+                    for (int i = 0; i < playerList.size(); i++) {
                         if (i == 0) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 4 * 3, borderH);
                             player.setLayoutParams(lp);
                             player.setY(0);
                             player.setX(0);
                         } else {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 4, borderH / 3);
                             player.setLayoutParams(lp);
                             player.setY((i - 1) * borderH / 3);
@@ -685,21 +674,21 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 case 5:
                 case 6:
                 case 7: {
-                    for (int i = 0; i < mPlayerList.size(); i++) {
+                    for (int i = 0; i < playerList.size(); i++) {
                         if (i == 0) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 4 * 2, borderH);
                             player.setLayoutParams(lp);
                             player.setY(0);
                             player.setX(0);
                         } else if (i > 0 && i < 3) {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 4, borderH / 3);
                             player.setLayoutParams(lp);
                             player.setY((i - 1) * borderH / 3);
                             player.setX(borderW / 4 * 2);
                         } else {
-                            StarPlayer player = mPlayerList.get(i).getVideoPlayer();
+                            StarPlayer player = playerList.get(i).getVideoPlayer();
                             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(borderW / 4, borderH / 3);
                             player.setLayoutParams(lp);
                             player.setY((i - 3) * borderH / 3);
@@ -752,7 +741,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 ).show();
                 break;
             case AEvent.AEVENT_LIVE_APPLY_LINK_RESULT:
-                if (((XHConstants.XHLiveJoinResult) eventObj) == XHConstants.XHLiveJoinResult.XHLiveJoinResult_accept) {
+                if (eventObj == XHConstants.XHLiveJoinResult.XHLiveJoinResult_accept) {
                     new AlertDialog.Builder(VideoLiveActivity.this).setCancelable(true)
                             .setTitle("房主同意连麦，是否现在开始上麦？")
                             .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -823,13 +812,9 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 final String banTime = eventObj.toString();
                 break;
             case AEvent.AEVENT_LIVE_REV_MSG:
+            case AEvent.AEVENT_LIVE_REV_PRIVATE_MSG:
                 XHIMMessage revMsg = (XHIMMessage) eventObj;
                 msgList.add(revMsg);
-                liveMsgListAdapter.notifyDataSetChanged();
-                break;
-            case AEvent.AEVENT_LIVE_REV_PRIVATE_MSG:
-                XHIMMessage revMsgPrivate = (XHIMMessage) eventObj;
-                msgList.add(revMsgPrivate);
                 liveMsgListAdapter.notifyDataSetChanged();
                 break;
             case AEvent.AEVENT_LIVE_ERROR:
@@ -866,10 +851,10 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     private void showManagerDialog(final String userId, final String msgText) {
         if (!userId.equals(MLOC.userId)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            if (createrId.equals(MLOC.userId)) {
+            if (creatorId.equals(MLOC.userId)) {
                 Boolean ac = false;
-                for (int i = 0; i < mPlayerList.size(); i++) {
-                    if (userId.equals(mPlayerList.get(i).getUserId())) {
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (userId.equals(playerList.get(i).getUserId())) {
                         ac = true;
                         break;
                     }

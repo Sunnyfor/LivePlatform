@@ -15,9 +15,9 @@ object SpKey {
     const val isUpdateVersion = "isUpdateVersion"
 
     /**
-     * 消息未读条数
+     * 直播信息实体类
      */
-    const val unreadRemindSize = "unreadRemindSize"
+    const val liveInfoBean = "liveInfoBean"
 
     /**
      * 手动修改hostURl

@@ -13,5 +13,5 @@
     <Button
         android:id="@+id/btn_create"
         style="@style/style_common_btn"
-        android:text="创建新直播" />
+        android:text="开播" />
 </LinearLayout>
