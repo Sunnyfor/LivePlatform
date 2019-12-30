@@ -20,9 +20,14 @@ object SpKey {
     const val unreadRemindSize = "unreadRemindSize"
 
     /**
-     * 部门id：角色权限
+     * 手动修改hostURl
      */
-    const val deptId: String = "deptId"
+    const val hostUrl: String = "hostUrl"
+
+    /**
+     * 保存hostList
+     */
+    const val hostList: String = "hostList"
 
     /**
      * 是否自动登录

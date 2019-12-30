@@ -1,5 +1,8 @@
 package com.sunny.livechat.constant
 
+import com.sunny.livechat.util.sp.SpKey
+import com.sunny.livechat.util.sp.SpUtil
+
 /**
  * Desc 接口配置清单
  * Author JoannChen
@@ -8,7 +11,26 @@ package com.sunny.livechat.constant
  */
 object UrlConstant {
 
-    const val host = "http://10.0.0.158:1081" //杜康直播
+    var host = ""
+        get() {
+            return if (field.isNotEmpty()) {
+                field
+            } else {
+                val value = SpUtil.getString(SpKey.hostUrl)
+                field = if (value.isNotEmpty()) {
+                    value
+                } else {
+                    "http://10.0.0.158:1081"
+                }
+                field
+            }
+        }
+        set(value) {
+            if (value.isNotEmpty()) {
+                field = value
+                SpUtil.setString(SpKey.hostUrl, value)
+            }
+        }
 
     /**
      * 登录

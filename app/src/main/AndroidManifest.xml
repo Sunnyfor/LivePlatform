@@ -43,6 +43,7 @@
         <activity android:name=".live.CreateLiveActivity" />
         <activity android:name=".live.LiveListActivity" />
         <activity android:name=".live.LiveVideoActivity" />
+        <activity android:name=".live.HostSetActivity" />
 
         <service
             android:name=".service.KeepLiveService"

@@ -41,7 +41,9 @@ class LiveListActivity : BaseActivity() {
 
     override fun setLayout(): Int = R.layout.activity_live_list
 
-    override fun initTitle(): View = titleManager.defaultTitle("直播大厅")
+    override fun initTitle(): View = titleManager.rightTitle("直播大厅","设置"){
+        startActivity(Intent(this,HostSetActivity::class.java))
+    }
 
     override fun initView() {
 
