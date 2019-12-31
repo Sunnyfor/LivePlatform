@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseRecycleAdapter
 import com.sunny.livechat.base.BaseRecycleViewHolder
+import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.live.bean.LiveListBean
 import kotlinx.android.synthetic.main.item_live_room.view.*
 
@@ -25,5 +26,11 @@ class LiveListAdapter(list: ArrayList<LiveListBean.LiveInfoBean>) : BaseRecycleA
         holder.itemView.tv_live_room_name.text = getData(position).liveName
         holder.itemView.tv_live_creator.text = getData(position).creatName
         holder.itemView.tv_create_time.text = getData(position).creatTime
+
+        holder.itemView.tv_label_mine.visibility = if (MLOC.userId == getData(position).creator) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 }

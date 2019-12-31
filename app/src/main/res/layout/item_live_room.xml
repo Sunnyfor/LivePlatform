@@ -24,6 +24,15 @@
         tools:text="JoannChen的直播间" />
 
     <TextView
+        android:id="@+id/tv_label_mine"
+        style="@style/style_font_black"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/ic_svg_label_mine"
+        android:gravity="center"
+        android:text="我的"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/tv_live_creator"
         style="@style/style_font_black"
         android:layout_below="@id/tv_live_room_name"
