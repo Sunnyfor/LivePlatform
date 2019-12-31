@@ -97,8 +97,9 @@
         android:id="@+id/iv_back_btn"
         android:layout_width="@dimen/dp_40"
         android:layout_height="@dimen/dp_40"
+        android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/dp_20"
-        android:background="@drawable/icon_btn_back_white" />
+        android:background="@drawable/ic_svg_close_live" />
 
     <ImageView
         android:id="@+id/iv_panel_btn"

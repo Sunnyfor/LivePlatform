@@ -250,9 +250,9 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
         vPlayerView = findViewById(R.id.view1);
         borderW = DensityUtils.screenWidth(this);
-        borderH = borderW / 3 * 4;
-        playerList = new ArrayList<>();
+        borderH = DensityUtils.screenHeight(this);
 
+        playerList = new ArrayList<>();
 
         vPanelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
