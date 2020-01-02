@@ -122,11 +122,11 @@ class CreateLiveActivity : BaseActivity() {
             object : ApiManager.OnResult<BaseModel<LiveListBean.LiveInfoBean>>() {
                 override fun onSuccess(model: BaseModel<LiveListBean.LiveInfoBean>) {
                     model.requestResult({
-                        MyApplication.getInstance().putData(SpKey.liveInfoBean, liveInfoBean)
-                        val intent = Intent(this@CreateLiveActivity, StartLiveActivity::class.java)
-                        intent.putExtra(IntentKey.liveName, et_live_name.text.toString())
-                        startActivity(intent)
-                        finish()
+                        if (MLOC.userId == liveInfoBean.creator) {
+                            comeToLivePage() //开始直播
+                        } else {
+                            doCreateLiveSDK() //创建直播
+                        }
                     }, {})
                 }
 
@@ -136,24 +136,21 @@ class CreateLiveActivity : BaseActivity() {
             })
     }
 
-    private fun doCreateLiveApi(json: String) {
-
-        ApiManager.postJson(null, json, UrlConstant.CREATE_LIVE_ROOM_URL,
-            object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
-                override fun onSuccess(model: BaseModel<LiveListBean>) {
-                    model.requestResult({
-                        ToastUtil.show("创建成功")
-                        finish()
-                        EventBus.getDefault().post(RefreshLiveListEvent())
-                    }, {})
-                }
-
-                override fun onFailed(code: String, msg: String) {
-                    ToastUtil.showInterfaceError(code, msg)
-                }
-            })
+    /**
+     * 进入直播页
+     */
+    private fun comeToLivePage() {
+        MyApplication.getInstance().putData(SpKey.liveInfoBean, liveInfoBean)
+        val intent = Intent(this@CreateLiveActivity, StartLiveActivity::class.java)
+        intent.putExtra(IntentKey.liveName, et_live_name.text.toString())
+        startActivity(intent)
+        finish()
     }
 
+
+    /**
+     * 创建直播间，走SDK
+     */
     private fun doCreateLiveSDK() {
 
         val liveName = et_live_name.text.toString()
@@ -192,6 +189,27 @@ class CreateLiveActivity : BaseActivity() {
                 ToastUtil.show(errMsg)
             }
         })
+    }
+
+    /**
+     * 创建直播间，走API接口
+     */
+    private fun doCreateLiveApi(json: String) {
+
+        ApiManager.postJson(null, json, UrlConstant.CREATE_LIVE_ROOM_URL,
+            object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
+                override fun onSuccess(model: BaseModel<LiveListBean>) {
+                    model.requestResult({
+                        EventBus.getDefault().post(RefreshLiveListEvent())
+                        ToastUtil.show("创建成功")
+                        comeToLivePage()
+                    }, {})
+                }
+
+                override fun onFailed(code: String, msg: String) {
+                    ToastUtil.showInterfaceError(code, msg)
+                }
+            })
     }
 
 }

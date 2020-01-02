@@ -75,9 +75,11 @@ class LiveListActivity : BaseActivity() {
         ApiManager.post(null, hashMapOf(), UrlConstant.GET_LIVE_ROOM_LIST_URL,
             object : ApiManager.OnResult<BaseModel<LiveListBean>>() {
                 override fun onSuccess(model: BaseModel<LiveListBean>) {
-                    list.clear()
-                    list.addAll(model.page?.list ?: arrayListOf())
-                    liveListAdapter.notifyDataSetChanged()
+                    model.requestResult({
+                        list.clear()
+                        list.addAll(model.page?.list ?: arrayListOf())
+                        liveListAdapter.notifyDataSetChanged()
+                    }, {})
                 }
 
                 override fun onFailed(code: String, msg: String) {

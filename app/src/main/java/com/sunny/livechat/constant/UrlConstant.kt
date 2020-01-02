@@ -20,7 +20,7 @@ object UrlConstant {
                 field = if (value.isNotEmpty()) {
                     value
                 } else {
-                    "http://10.0.0.158:1081"
+                    "http://114.242.23.225:1081"
                 }
                 field
             }

@@ -53,6 +53,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Set;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
+
 public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
     /**
@@ -130,7 +133,6 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         String liveName = liveInfoBean.getLiveName();
         liveCode = liveInfoBean.getLiveCode();
         creatorId = liveInfoBean.getCreator();
-        XHConstants.XHLiveType liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic; //后期改成接口调用：liveInfoBean.liveClassId
 
         if (TextUtils.isEmpty(liveCode) || TextUtils.isEmpty(liveName)) {
             ToastUtil.INSTANCE.show("没有直播信息");
@@ -164,6 +166,16 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
         liveMsgListAdapter = new LiveMsgListAdapter(msgList);
         recyclerView.setAdapter(liveMsgListAdapter);
+
+        liveMsgListAdapter.setOnItemClickListener(new Function2<View, Integer, Unit>() {
+            @Override
+            public Unit invoke(View view, Integer integer) {
+                String clickUserId = liveMsgListAdapter.getData(integer).fromId;
+                String msgText = liveMsgListAdapter.getData(integer).contentData;
+                showManagerDialog(clickUserId, msgText);
+                return null;
+            }
+        });
 
         View vSendBtn = findViewById(R.id.iv_send_btn);
         vSendBtn.setOnClickListener(new View.OnClickListener() {
@@ -323,10 +335,13 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         liveManager.watchLive(liveCode, new IXHResultCallback() {
             @Override
             public void success(Object data) {
+                Logger.e("IM观众加入直播");
             }
 
             @Override
             public void failed(final String errMsg) {
+                Logger.e("IM观众加入失败");
+                ToastUtil.INSTANCE.show(errMsg);
                 stopAndFinish();
             }
         });
@@ -808,10 +823,12 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 //                onLineUserNumber = (int) eventObj;
                 break;
             case AEvent.AEVENT_LIVE_SELF_KICKED:
+                ToastUtil.INSTANCE.show("你已被踢出");
                 stopAndFinish();
                 break;
             case AEvent.AEVENT_LIVE_SELF_BANNED:
                 final String banTime = eventObj.toString();
+                ToastUtil.INSTANCE.show("你已被禁言," + banTime + "秒后自动解除");
                 break;
             case AEvent.AEVENT_LIVE_REV_MSG:
             case AEvent.AEVENT_LIVE_REV_PRIVATE_MSG:
@@ -824,6 +841,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                 if (errStr.equals("30016")) {
                     errStr = "直播关闭";
                 }
+                ToastUtil.INSTANCE.show(errStr);
                 stopAndFinish();
                 break;
             case AEvent.AEVENT_LIVE_SELF_COMMANDED_TO_STOP:
@@ -832,7 +850,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
                     vMicBtn.setSelected(false);
                     vCameraBtn.setVisibility(View.GONE);
                     vPanelBtn.setVisibility(View.GONE);
-//                            vCarBtn.setVisibility(View.GONE);
+                    ToastUtil.INSTANCE.show("您的表演被叫停");
                 }
                 break;
             case AEvent.AEVENT_LIVE_REV_REALTIME_DATA:
