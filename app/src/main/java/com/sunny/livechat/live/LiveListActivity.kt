@@ -7,6 +7,7 @@ import com.sunny.livechat.MyApplication
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
 import com.sunny.livechat.base.BaseModel
+import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.constant.RefreshLiveListEvent
 import com.sunny.livechat.constant.UrlConstant
 import com.sunny.livechat.http.ApiManager
@@ -34,8 +35,12 @@ class LiveListActivity : BaseActivity() {
     private val liveListAdapter: LiveListAdapter by lazy {
         LiveListAdapter(list).apply {
             this.setOnItemClickListener { _, position ->
-                MyApplication.getInstance().putData(SpKey.liveInfoBean, liveListAdapter.getData(position))
-                startActivity(Intent(this@LiveListActivity, VideoLiveActivity::class.java))
+                if (MLOC.userId == getData(position).creator) {
+                    startActivity(Intent(this@LiveListActivity, CreateLiveActivity::class.java))
+                } else {
+                    MyApplication.getInstance().putData(SpKey.liveInfoBean, liveListAdapter.getData(position))
+                    startActivity(Intent(this@LiveListActivity, VideoLiveActivity::class.java))
+                }
             }
         }
     }
