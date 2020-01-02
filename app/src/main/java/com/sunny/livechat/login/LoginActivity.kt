@@ -13,6 +13,7 @@ import com.orhanobut.logger.Logger
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
 import com.sunny.livechat.chat.MLOC
+import com.sunny.livechat.live.HostSetActivity
 import com.sunny.livechat.live.LiveListActivity
 import com.sunny.livechat.login.bean.UserBean
 import com.sunny.livechat.login.presenter.LoginPresenter
@@ -21,6 +22,7 @@ import com.sunny.livechat.service.KeepLiveService
 import com.sunny.livechat.util.sp.SpKey
 import com.sunny.livechat.util.sp.SpUtil
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.layout_title.view.*
 import java.util.*
 
 /**
@@ -38,7 +40,11 @@ class LoginActivity : BaseActivity(), ILoginView {
 
     override fun setLayout(): Int = R.layout.activity_login
 
-    override fun initTitle(): View? = titleManager.defaultTitle("登录")
+    override fun initTitle(): View? = titleManager.rightTitle("登录", "设置") {
+        startActivity(Intent(this, HostSetActivity::class.java))
+    }.apply {
+        this.tv_left.visibility = View.INVISIBLE
+    }
 
     override fun initView() {
 

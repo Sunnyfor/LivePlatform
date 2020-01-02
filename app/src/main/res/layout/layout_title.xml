@@ -6,9 +6,8 @@
     <ImageView
         android:id="@+id/tv_left"
         style="@style/style_title_icon"
-        android:paddingStart="@dimen/dp_12"
-        android:paddingEnd="@dimen/dp_12"
-        android:text="" />
+        android:padding="@dimen/dp_10"
+        android:src="@drawable/ic_svg_back_btn" />
 
     <TextView
         android:id="@+id/tv_title"

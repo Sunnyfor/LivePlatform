@@ -16,6 +16,7 @@ import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.sp.SpKey
 import kotlinx.android.synthetic.main.activity_live_list.*
 import kotlinx.android.synthetic.main.layout_list.*
+import kotlinx.android.synthetic.main.layout_title.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -41,8 +42,8 @@ class LiveListActivity : BaseActivity() {
 
     override fun setLayout(): Int = R.layout.activity_live_list
 
-    override fun initTitle(): View = titleManager.rightTitle("直播大厅", "设置") {
-        startActivity(Intent(this, HostSetActivity::class.java))
+    override fun initTitle(): View = titleManager.defaultTitle("直播大厅").apply {
+        this.tv_left.visibility = View.INVISIBLE
     }
 
     override fun initView() {
