@@ -3,7 +3,25 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
+static def releaseTime() {
+    return new Date().format("yyyy.MM.dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
+    signingConfigs {
+        debug {
+            storeFile file('../app_live_platform_key.jks')
+            storePassword 'admin123'
+            keyAlias = '直播平台'
+            keyPassword 'admin123'
+        }
+        release {
+            storeFile file('../app_live_platform_key.jks')
+            storePassword 'admin123'
+            keyAlias = '直播平台'
+            keyPassword 'admin123'
+        }
+    }
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
 
@@ -32,6 +50,13 @@ android {
         main {
             jniLibs.srcDirs = ['libs']
         }
+    }
+
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                outputFileName = "app-live-platform-${variant.name}-v${variant.versionName}-${releaseTime()}.apk"
+            }
     }
 }
 
