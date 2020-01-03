@@ -20,7 +20,6 @@
             android:id="@+id/tv_user_id"
             style="@style/style_font_black"
             android:textColor="@color/font_orange"
-            android:textSize="@dimen/sp_12"
             android:textStyle="bold"
             tools:text="JoannChen" />
 
@@ -28,7 +27,6 @@
             android:id="@+id/tv_msg"
             style="@style/style_font_white"
             android:layout_marginStart="@dimen/dp_5"
-            android:textSize="@dimen/sp_12"
             tools:text=" 哈哈" />
 
     </LinearLayout>
