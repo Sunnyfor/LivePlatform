@@ -14,7 +14,7 @@ import com.starrtc.starrtcsdk.core.videosrc.XHVideoSourceManager
 import com.sunny.livechat.chat.AEvent
 import com.sunny.livechat.chat.IChatListener
 import com.sunny.livechat.chat.MLOC
-import com.sunny.livechat.chat.beauty.DemoVideoSourceCallback
+import com.sunny.livechat.chat.VideoSourceCallback
 import com.sunny.livechat.chat.listener.*
 
 /**
@@ -69,7 +69,7 @@ class KeepLiveService : Service(), IChatListener {
         xhClient?.voipP2PManager?.addListener(XHVoipP2PManagerListener())
         xhClient?.loginManager?.addListener(XHLoginManagerListener())
 
-        XHVideoSourceManager.getInstance().videoSourceCallback = DemoVideoSourceCallback()
+        XHVideoSourceManager.getInstance().videoSourceCallback = VideoSourceCallback()
 
         xhClient?.loginManager?.loginFree(object : IXHResultCallback {
             override fun success(data: Any?) {

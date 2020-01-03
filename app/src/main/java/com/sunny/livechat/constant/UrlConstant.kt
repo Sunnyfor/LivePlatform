@@ -68,4 +68,21 @@ object UrlConstant {
      */
     const val GET_LIVE_USER_INFO_URL = "app/sys/user/getUserIdAndNameToList"
 
+    /**
+     * 【直播】上传聊天记录：postJson
+     * content    //内容
+     * userId     //发送人
+     * sendTime   //时间戳
+     * chatRoomId //所属群组
+     */
+    const val SEND_CHAT_MSG_URL = "app/app/appgroupmessage/save"
+
+
+    /**
+     * 【直播】获取聊天记录
+     * ?toLiveId=liveId
+     */
+    const val GET_CHAT_MSG_URL = "app/app/appgroupmessage/getGroupMsgList"
+
+
 }

@@ -38,9 +38,14 @@ import com.sunny.livechat.chat.AEvent;
 import com.sunny.livechat.chat.IChatListener;
 import com.sunny.livechat.chat.MLOC;
 import com.sunny.livechat.live.adapter.LiveMsgListAdapter;
+import com.sunny.livechat.live.bean.GetMsgBean;
 import com.sunny.livechat.live.bean.LiveListBean;
+import com.sunny.livechat.live.bean.SendMsgBean;
 import com.sunny.livechat.live.bean.ViewPosition;
+import com.sunny.livechat.live.presenter.ChatMsgPresenter;
+import com.sunny.livechat.live.view.IChatMsgView;
 import com.sunny.livechat.util.DensityUtils;
+import com.sunny.livechat.util.LogUtil;
 import com.sunny.livechat.util.ToastUtil;
 import com.sunny.livechat.util.sp.SpKey;
 import com.sunny.livechat.widget.CircularCoverView;
@@ -56,7 +61,7 @@ import java.util.Set;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
 
-public class VideoLiveActivity extends BaseActivity implements IChatListener {
+public class VideoLiveActivity extends BaseActivity implements IChatListener, IChatMsgView {
 
     /**
      * true为竖屏，false为横屏
@@ -79,7 +84,8 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     private String creatorId;
     private String liveCode;
 
-    private ArrayList<XHIMMessage> msgList;
+    private ArrayList<XHIMMessage> msgList = new ArrayList<>();
+
     private ArrayList<ViewPosition> playerList;
 
     private XHLiveManager liveManager;
@@ -97,7 +103,9 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     private View vCameraBtn;
     private View vPanelBtn;
     private View vCleanBtn;
+    private RecyclerView recyclerView;
 
+    private ChatMsgPresenter presenter;
 
     @Override
     public int setLayout() {
@@ -160,13 +168,10 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         vEditText = findViewById(R.id.et_input);
         vEditText.clearFocus();
 
-        msgList = new ArrayList<>();
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         liveMsgListAdapter = new LiveMsgListAdapter(msgList);
         recyclerView.setAdapter(liveMsgListAdapter);
-
         liveMsgListAdapter.setOnItemClickListener(new Function2<View, Integer, Unit>() {
             @Override
             public Unit invoke(View view, Integer integer) {
@@ -288,6 +293,8 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         });
 
         init();
+
+        presenter = new ChatMsgPresenter(this);
     }
 
     @Override
@@ -296,7 +303,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
     @Override
     public void loadData() {
-
+        presenter.getChatMsgList(liveCode);
     }
 
     @Override
@@ -304,6 +311,28 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
 
     }
 
+
+    @Override
+    public void sendChatMsgList() {
+        LogUtil.INSTANCE.i("聊天记录报错成功");
+    }
+
+    @Override
+    public void getChatMsgList(@NotNull ArrayList<GetMsgBean> list) {
+
+        for (int i = 0; i < list.size(); i++) {
+            XHIMMessage imMessage = new XHIMMessage();
+            imMessage.fromId = list.get(i).getUid();
+            imMessage.contentData = list.get(i).getContent();
+            msgList.add(imMessage);
+        }
+        refreshChatMsg();
+    }
+
+    private void refreshChatMsg(){
+        liveMsgListAdapter.notifyDataSetChanged();
+        recyclerView.scrollToPosition(msgList.size() - 1);
+    }
 
     private void init() {
         if (creatorId.equals(MLOC.userId)) {
@@ -355,8 +384,17 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
             XHIMMessage imMessage = liveManager.sendPrivateMessage(msg, mPrivateMsgTargetId, null);
             msgList.add(imMessage);
         }
-        liveMsgListAdapter.notifyDataSetChanged();
+        refreshChatMsg();
         mPrivateMsgTargetId = "";
+
+
+        SendMsgBean chatMsgBean = new SendMsgBean();
+
+        chatMsgBean.setUserId(mPrivateMsgTargetId);
+        chatMsgBean.setChatRoomId(liveCode);
+        chatMsgBean.setContent(msg);
+        chatMsgBean.setSendTime(System.currentTimeMillis());
+        presenter.sendChatMsgList(chatMsgBean);
 
     }
 
@@ -839,7 +877,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
             case AEvent.AEVENT_LIVE_REV_PRIVATE_MSG:
                 XHIMMessage revMsg = (XHIMMessage) eventObj;
                 msgList.add(revMsg);
-                liveMsgListAdapter.notifyDataSetChanged();
+                refreshChatMsg();
                 break;
             case AEvent.AEVENT_LIVE_ERROR:
                 String errStr = (String) eventObj;
@@ -976,4 +1014,5 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
         removeListener();
         finish();
     }
+
 }
