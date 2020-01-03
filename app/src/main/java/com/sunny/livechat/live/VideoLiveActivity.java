@@ -584,20 +584,25 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener {
     }
 
 
-    private void deletePlayer(String removeUserId) {
+    private void deletePlayer(final String removeUserId) {
         if (playerList != null && playerList.size() > 0) {
-            for (int i = 0; i < playerList.size(); i++) {
-                ViewPosition temp = playerList.get(i);
-                if (removeUserId.equals(temp.getUserId())) {
-                    ViewPosition remove = playerList.remove(i);
-                    vPlayerView.removeView(remove.getVideoPlayer());
-                    resetLayout();
-                    if (playerList.size() > 0) {
-                        liveManager.changeToBig(playerList.get(0).getUserId());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < playerList.size(); i++) {
+                        ViewPosition temp = playerList.get(i);
+                        if (removeUserId.equals(temp.getUserId())) {
+                            ViewPosition remove = playerList.remove(i);
+                            vPlayerView.removeView(remove.getVideoPlayer());
+                            resetLayout();
+                            if (playerList.size() > 0) {
+                                liveManager.changeToBig(playerList.get(0).getUserId());
+                            }
+                            break;
+                        }
                     }
-                    break;
                 }
-            }
+            });
         }
     }
 
