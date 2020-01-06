@@ -4,11 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/view1"
+    <FrameLayout
+        android:id="@+id/fl_video"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_line" />
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/view1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_line" />
+    </FrameLayout>
 
     <com.starrtc.starrtcsdk.core.player.StarWhitePanel
         android:id="@+id/starWhitePanel"

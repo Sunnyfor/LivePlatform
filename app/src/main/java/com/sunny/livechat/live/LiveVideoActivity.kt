@@ -24,6 +24,7 @@ import com.starrtc.starrtcsdk.core.audio.StarRTCAudioManager
 import com.starrtc.starrtcsdk.core.im.message.XHIMMessage
 import com.starrtc.starrtcsdk.core.player.StarPlayer
 import com.starrtc.starrtcsdk.core.player.StarPlayerScaleType
+import com.sunny.livechat.MyApplication
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
 import com.sunny.livechat.chat.AEvent
@@ -35,6 +36,8 @@ import com.sunny.livechat.live.bean.ViewPosition
 import com.sunny.livechat.util.DensityUtils
 import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.intent.IntentKey
+import com.sunny.livechat.util.sp.SpKey
+import com.sunny.livechat.util.sp.SpKey.liveInfoBean
 import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
 import org.json.JSONException
@@ -75,7 +78,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
     private var msgList = ArrayList<XHIMMessage>()
     private var playerList = ArrayList<ViewPosition>()
 
-    private lateinit var liveManager: XHLiveManager
+    private var liveManager: XHLiveManager? = null
 
     private var mPrivateMsgTargetId: String? = null
 
@@ -114,10 +117,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         val dm = resources.displayMetrics
         isPortraitScreen = dm.heightPixels > dm.widthPixels
 
-        val liveInfoBean = intent.getSerializableExtra(IntentKey.objectBean) as LiveListBean.LiveInfoBean
-        liveCode = liveInfoBean.liveCode
-        liveName = liveInfoBean.liveName
-        creatorId = liveInfoBean.creator
+        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        liveCode = liveInfoBean?.liveCode
+        liveName = liveInfoBean?.liveName
+        creatorId = liveInfoBean?.creator
         liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic //后期改成接口调用：liveInfoBean.liveClassId
 
 
@@ -354,11 +357,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
      */
     private fun stopLive() {
         liveManager?.leaveLive(object : IXHResultCallback {
-            override fun success(data: Any) {
+            override fun success(data: Any?) {
                 stopAndFinish()
             }
 
-            override fun failed(errMsg: String) {
+            override fun failed(errMsg: String?) {
                 ToastUtil.show(errMsg)
                 stopAndFinish()
             }

@@ -2,10 +2,15 @@ package com.sunny.livechat.live;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -14,8 +19,10 @@ import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +52,11 @@ import com.sunny.livechat.live.bean.ViewPosition;
 import com.sunny.livechat.live.presenter.ChatMsgPresenter;
 import com.sunny.livechat.live.view.IChatMsgView;
 import com.sunny.livechat.util.DensityUtils;
+import com.sunny.livechat.util.LiveUtils;
 import com.sunny.livechat.util.LogUtil;
+import com.sunny.livechat.util.MEIZU;
+import com.sunny.livechat.util.MIUI;
+import com.sunny.livechat.util.PermissionUtils;
 import com.sunny.livechat.util.ToastUtil;
 import com.sunny.livechat.util.sp.SpKey;
 import com.sunny.livechat.widget.CircularCoverView;
@@ -56,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import kotlin.Unit;
@@ -96,6 +108,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
 
     private String mPrivateMsgTargetId;
 
+    private FrameLayout fl_video;
     private StarWhitePanel vPaintPlayer;
     private RelativeLayout vPlayerView;
     private EditText vEditText;
@@ -154,6 +167,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
         TextView vRoomId = findViewById(R.id.iv_live_id);
         vRoomId.setText(("直播编号：" + liveName));
 
+        fl_video = findViewById(R.id.fl_video);
         vPaintPlayer = findViewById(R.id.starWhitePanel);
         vPanelBtn = findViewById(R.id.iv_panel_btn);
         vCleanBtn = findViewById(R.id.iv_clean_btn);
@@ -436,8 +450,13 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
 
     @Override
     public void onStop() {
-        removeListener();
         super.onStop();
+        if (!isAppOnForeground()) {
+            showLiveWindow();
+            ToastUtil.INSTANCE.show("app进入后台了！");
+        } else {
+            removeListener();
+        }
     }
 
     private void removeListener() {
@@ -1013,6 +1032,65 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
         }
         removeListener();
         finish();
+    }
+
+
+    public boolean isAppOnForeground() {
+        // Returns a list of application processes that are running on the
+        // device
+
+        ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        String packageName = getApplicationContext().getPackageName();
+
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager
+                .getRunningAppProcesses();
+        if (appProcesses == null)
+            return false;
+
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            // The name of the process that this object is associated with.
+            if (appProcess.processName.equals(packageName)
+                    && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private void showLiveWindow() {
+
+        fl_video.removeView(vPlayerView);
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(this)) {
+                //没有悬浮窗权限,跳转申请
+                Toast.makeText(getApplicationContext(), "请开启悬浮窗权限", Toast.LENGTH_LONG).show();
+                //魅族不支持直接打开应用设置
+                if (!MEIZU.isMeizuFlymeOS()) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, 0);
+                } else {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                    startActivityForResult(intent, 0);
+                }
+            } else {
+                LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+            }
+        } else {
+            //6.0以下　只有MUI会修改权限
+            if (MIUI.rom()) {
+                if (PermissionUtils.hasPermission(this)) {
+                    LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+                } else {
+                    MIUI.req(this);
+                }
+            } else {
+                LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+            }
+        }
+
     }
 
 }

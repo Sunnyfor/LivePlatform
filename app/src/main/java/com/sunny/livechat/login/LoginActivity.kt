@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.View
@@ -12,6 +13,7 @@ import android.widget.Toast
 import com.orhanobut.logger.Logger
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseActivity
+import com.sunny.livechat.chat.AEvent
 import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.live.HostSetActivity
 import com.sunny.livechat.live.LiveListActivity
@@ -47,6 +49,8 @@ class LoginActivity : BaseActivity(), ILoginView {
     }
 
     override fun initView() {
+
+        AEvent.setHandler(Handler())
 
         btn_login.setOnClickListener(this)
 
@@ -160,6 +164,7 @@ class LoginActivity : BaseActivity(), ILoginView {
                     Manifest.permission.RECORD_AUDIO
                 )
             }
+
             if (permissionsList.size != 0) {
                 if (times == 1) {
                     requestPermissions(

@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".MyApplication"
@@ -43,7 +44,9 @@
         <activity android:name=".live.CreateLiveActivity" />
         <activity android:name=".live.LiveListActivity" />
         <activity android:name=".live.LiveVideoActivity" />
-        <activity android:name=".live.VideoLiveActivity" />
+        <activity
+            android:name=".live.VideoLiveActivity"
+            android:launchMode="singleInstance" />
 
         <activity android:name=".live.HostSetActivity" />
         <activity android:name=".live.StartLiveActivity" />
