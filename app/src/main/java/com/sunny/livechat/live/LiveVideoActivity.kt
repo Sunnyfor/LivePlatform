@@ -6,6 +6,9 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +16,7 @@ import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.orhanobut.logger.Logger
 import com.starrtc.starrtcsdk.api.XHClient
@@ -31,18 +35,18 @@ import com.sunny.livechat.chat.AEvent
 import com.sunny.livechat.chat.IChatListener
 import com.sunny.livechat.chat.MLOC
 import com.sunny.livechat.live.adapter.LiveMsgListAdapter
+import com.sunny.livechat.live.bean.GetMsgBean
 import com.sunny.livechat.live.bean.LiveListBean
+import com.sunny.livechat.live.bean.SendMsgBean
 import com.sunny.livechat.live.bean.ViewPosition
-import com.sunny.livechat.util.DensityUtils
-import com.sunny.livechat.util.ToastUtil
-import com.sunny.livechat.util.intent.IntentKey
+import com.sunny.livechat.live.presenter.ChatMsgPresenter
+import com.sunny.livechat.live.view.IChatMsgView
+import com.sunny.livechat.util.*
 import com.sunny.livechat.util.sp.SpKey
-import com.sunny.livechat.util.sp.SpKey.liveInfoBean
 import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.*
 
 /**
  * Desc 直播播放页
@@ -50,7 +54,7 @@ import java.util.*
  * Mail yongzuo.chen@foxmail.com
  * Date 2019/12/23 19:51
  */
-class LiveVideoActivity : BaseActivity(), IChatListener {
+class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
     /**
      * true为竖屏，false为横屏
@@ -93,6 +97,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         }
     }
 
+    private val chatMsgPresenter: ChatMsgPresenter by lazy {
+        ChatMsgPresenter(this)
+    }
 
     override fun setLayout(): Int = R.layout.activity_video_live
 
@@ -102,16 +109,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
 
     override fun initView() {
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
         liveManager = XHClient.getInstance().getLiveManager(this)
 
         starRTCAudioManager = StarRTCAudioManager.create(this)
-        starRTCAudioManager?.start { _, _ ->
-            Logger.i("IM语音开启")
-        }
+        starRTCAudioManager?.start { _, _ -> Logger.i("IM语音开启") }
 
 
         val dm = resources.displayMetrics
@@ -122,14 +127,6 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
         liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic //后期改成接口调用：liveInfoBean.liveClassId
-
-
-        if (TextUtils.isEmpty(liveCode) || TextUtils.isEmpty(liveName) || liveType == null) {
-            ToastUtil.show("没有直播信息")
-            stopAndFinish()
-            return
-        }
-
 
         val layoutManager = LinearLayoutManager(this)
         layoutManager.stackFromEnd = true
@@ -143,27 +140,19 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         et_input.clearFocus()
 
         borderW = DensityUtils.screenWidth(this)
-        borderH = borderW / 3 * 4
-
+        borderH = DensityUtils.screenHeight(this)
 
         if (creatorId != null && creatorId == MLOC.userId) {
-            if (liveCode == null) {
-                startActivity(Intent(this, CreateLiveActivity::class.java))
-            } else {
-                startLive()
-            }
-
+            startLive()
             iv_mic_btn.visibility = View.GONE
             iv_switch_camera.visibility = View.VISIBLE
             iv_panel_btn.visibility = View.VISIBLE
         } else {
             joinLive()
-
             iv_mic_btn.visibility = View.VISIBLE
             iv_switch_camera.visibility = View.GONE
             iv_panel_btn.visibility = View.GONE
         }
-
 
         addListener()
 
@@ -174,6 +163,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         iv_send_btn.setOnClickListener(this)
         iv_mic_btn.setOnClickListener(this)
     }
+
 
     override fun onClickEvent(v: View) {
         when (v.id) {
@@ -205,14 +195,32 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         }
     }
 
+
     override fun loadData() {}
 
 
     override fun close() {}
 
 
+    override fun sendChatMsgList() {
+        LogUtil.i("聊天记录报错成功")
+    }
+
+
+    override fun getChatMsgList(list: java.util.ArrayList<GetMsgBean>) {
+
+        for (i in list.indices) {
+            val imMessage = XHIMMessage()
+            imMessage.fromId = list[i].uid
+            imMessage.contentData = list[i].content
+            msgList.add(imMessage)
+        }
+        refreshChatMsg()
+    }
+
+
     override fun dispatchEvent(aEventID: String?, success: Boolean, eventObj: Any?) {
-        Logger.e("IM dispatchEvent  $aEventID$eventObj")
+        Logger.e("IM事件分发  $aEventID : $eventObj")
         when (aEventID) {
             AEvent.AEVENT_LIVE_ADD_UPLOADER -> {
                 try {
@@ -283,22 +291,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 val banTime = eventObj.toString()
                 ToastUtil.show("你已被禁言, $banTime 秒后自动解除")
             }
-            AEvent.AEVENT_LIVE_REV_MSG -> {
+            AEvent.AEVENT_LIVE_REV_MSG,
+            AEvent.AEVENT_LIVE_REV_PRIVATE_MSG -> {
                 val revMsg = eventObj as XHIMMessage
                 msgList.add(revMsg)
-                liveMsgListAdapter.notifyDataSetChanged()
-            }
-            AEvent.AEVENT_LIVE_REV_PRIVATE_MSG -> {
-                val revMsgPrivate = eventObj as XHIMMessage
-                msgList.add(revMsgPrivate)
-                liveMsgListAdapter.notifyDataSetChanged()
+                refreshChatMsg()
             }
             AEvent.AEVENT_LIVE_ERROR -> {
-                var errStr = eventObj as String
-                if (errStr == "30016") {
-                    errStr = "直播关闭"
-                }
-                ToastUtil.show(errStr)
+                ToastUtil.show("直播间关闭")
                 stopAndFinish()
             }
             AEvent.AEVENT_LIVE_SELF_COMMANDED_TO_STOP -> if (isUploader) {
@@ -339,13 +339,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
     private fun startLive() {
         isUploader = true
         liveManager?.startLive(liveCode, object : IXHResultCallback {
-            override fun success(data: Any) {
+            override fun success(data: Any?) {
                 Logger.e("IM直播开始 $data")
+                chatMsgPresenter.getChatMsgList(liveCode ?: "")
             }
 
             override fun failed(errMsg: String) {
                 Logger.e("IM直播失败 $errMsg")
-                ToastUtil.show(errMsg)
+                ToastUtil.show("直播开播失败")
                 stopAndFinish()
             }
         })
@@ -385,11 +386,12 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         liveManager?.watchLive(liveCode, object : IXHResultCallback {
             override fun success(data: Any) {
                 Logger.e("IM观众加入直播 $data")
+                chatMsgPresenter.getChatMsgList(liveCode ?: "")
             }
 
             override fun failed(errMsg: String) {
                 Logger.e("IM观众加入失败 $errMsg")
-                ToastUtil.show(errMsg)
+                ToastUtil.show("当前没有直播信息")
                 stopAndFinish()
             }
         })
@@ -413,9 +415,25 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 msgList.add(it)
             }
         }
-        liveMsgListAdapter.notifyDataSetChanged()
+        refreshChatMsg()
         mPrivateMsgTargetId = ""
 
+        // 走接口保存聊天记录
+        val chatMsgBean = SendMsgBean()
+        chatMsgBean.chatRoomId = liveCode
+        chatMsgBean.content = msg
+        chatMsgBean.sendTime = System.currentTimeMillis()
+        chatMsgPresenter.sendChatMsgList(chatMsgBean)
+
+    }
+
+
+    /**
+     * 刷新聊天数据
+     */
+    private fun refreshChatMsg() {
+        liveMsgListAdapter.notifyDataSetChanged()
+        recyclerView.scrollToPosition(msgList.size - 1)
     }
 
 
@@ -486,7 +504,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         val player = StarPlayer(this)
         newOne.videoPlayer = player
         playerList.add(newOne)
-        view1.addView(player)
+        rl_player.addView(player)
         val coverView = CircularCoverView(this)
         coverView.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -514,7 +532,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
                 val temp = playerList[i]
                 if (temp.userId.equals(removeUserId)) {
                     val remove = playerList.removeAt(i)
-                    view1.removeView(remove.videoPlayer)
+                    rl_player.removeView(remove.videoPlayer)
                     resetLayout()
                     liveManager?.changeToBig(playerList[0].userId)
                     break
@@ -732,6 +750,44 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
     }
 
 
+    /**
+     * 展示直播悬浮框
+     */
+    private fun showLiveWindow() {
+
+        fl_video.removeView(rl_player)
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(this)) {
+                //没有悬浮窗权限,跳转申请
+                Toast.makeText(applicationContext, "请开启悬浮窗权限", Toast.LENGTH_LONG).show()
+                //魅族不支持直接打开应用设置
+                if (!MEIZU.isMeizuFlymeOS()) {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                    startActivityForResult(intent, 0)
+                } else {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    startActivityForResult(intent, 0)
+                }
+            } else {
+                LiveUtil.getInstance().initLive(this, fl_video, rl_player)
+            }
+        } else {
+            //6.0以下　只有MUI会修改权限
+            if (MIUI.rom()) {
+                if (PermissionUtils.hasPermission(this)) {
+                    LiveUtil.getInstance().initLive(this, fl_video, rl_player)
+                } else {
+                    MIUI.req(this)
+                }
+            } else {
+                LiveUtil.getInstance().initLive(this, fl_video, rl_player)
+            }
+        }
+
+    }
+
+
     private fun startAnimation(clickPlayer: StarPlayer?, mainPlayer: StarPlayer?) {
         if (clickPlayer == null || mainPlayer == null) {
             return
@@ -863,9 +919,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener {
         addListener()
     }
 
-    override fun onStop() {
-        removeListener()
+    public override fun onStop() {
         super.onStop()
+        if (!LiveUtil.isAppOnForeground()) {
+            showLiveWindow()
+            ToastUtil.show("app进入后台了！")
+        } else {
+            removeListener()
+        }
     }
 
 }

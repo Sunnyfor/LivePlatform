@@ -1,6 +1,7 @@
 package com.sunny.livechat.util;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -14,11 +15,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import androidx.core.content.ContextCompat;
-
-import com.starrtc.starrtcsdk.core.player.StarWhitePanel;
+import com.sunny.livechat.MyApplication;
 import com.sunny.livechat.R;
-import com.sunny.livechat.live.VideoLiveActivity;
+import com.sunny.livechat.live.LiveVideoActivity;
+
+import java.util.List;
 
 
 /**
@@ -27,13 +28,13 @@ import com.sunny.livechat.live.VideoLiveActivity;
  * Mail yongzuo.chen@foxmail.com
  * Date 2020/1/3 17:21
  */
-public class LiveUtils {
+public class LiveUtil {
 
-    private LiveUtils() {
+    private LiveUtil() {
 
     }
 
-    private static LiveUtils utils;
+    private static LiveUtil utils;
 
     //布局参数.
     private WindowManager.LayoutParams params;
@@ -52,9 +53,9 @@ public class LiveUtils {
     // 是否是移动事件
     private boolean isMoved = false;
 
-    public static LiveUtils getInstance() {
+    public static LiveUtil getInstance() {
         if (utils == null) {
-            utils = new LiveUtils();
+            utils = new LiveUtil();
         }
 
         return utils;
@@ -148,8 +149,8 @@ public class LiveUtils {
 
                             if (Math.abs(fmoveX - start_X) < offset && Math.abs(fmoveY - start_Y) < offset) {
                                 isMoved = false;
-                                remove(frameLayout,vPlayerView);
-                                Intent intent = new Intent(context, VideoLiveActivity.class);
+                                remove(frameLayout, vPlayerView);
+                                Intent intent = new Intent(context, LiveVideoActivity.class);
                                 context.startActivity(intent);
 
 
@@ -185,4 +186,26 @@ public class LiveUtils {
         frameLayout.addView(vPlayerView);
     }
 
+    /**
+     * 判断APP是否在前端显示
+     */
+    public static boolean isAppOnForeground() {
+
+        ActivityManager activityManager = (ActivityManager) MyApplication.Companion.getInstance().getSystemService(Context.ACTIVITY_SERVICE);
+        String packageName = MyApplication.Companion.getInstance().getPackageName();
+
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager
+                .getRunningAppProcesses();
+        if (appProcesses == null)
+            return false;
+
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            // The name of the process that this object is associated with.
+            if (appProcess.processName.equals(packageName) && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

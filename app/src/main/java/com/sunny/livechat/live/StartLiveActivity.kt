@@ -55,7 +55,7 @@ class StartLiveActivity : BaseActivity() {
             R.id.btn_create -> {
                 xhSdkHelper?.stopPerview()
                 xhSdkHelper = null
-                startActivity(Intent(this@StartLiveActivity, VideoLiveActivity::class.java))
+                startActivity(Intent(this@StartLiveActivity, LiveVideoActivity::class.java))
                 finish()
             }
             R.id.iv_switch_camera -> xhSdkHelper?.switchCamera()

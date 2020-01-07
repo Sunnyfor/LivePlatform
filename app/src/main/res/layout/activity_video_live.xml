@@ -10,7 +10,7 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:id="@+id/view1"
+            android:id="@+id/rl_player"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/color_line" />

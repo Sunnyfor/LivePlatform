@@ -39,7 +39,7 @@ class LiveListActivity : BaseActivity() {
                     startActivity(Intent(this@LiveListActivity, CreateLiveActivity::class.java))
                 } else {
                     MyApplication.getInstance().putData(SpKey.liveInfoBean, liveListAdapter.getData(position))
-                    startActivity(Intent(this@LiveListActivity, VideoLiveActivity::class.java))
+                    startActivity(Intent(this@LiveListActivity, LiveVideoActivity::class.java))
                 }
             }
         }

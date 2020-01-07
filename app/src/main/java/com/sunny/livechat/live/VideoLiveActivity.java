@@ -2,7 +2,6 @@ package com.sunny.livechat.live;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,7 +51,7 @@ import com.sunny.livechat.live.bean.ViewPosition;
 import com.sunny.livechat.live.presenter.ChatMsgPresenter;
 import com.sunny.livechat.live.view.IChatMsgView;
 import com.sunny.livechat.util.DensityUtils;
-import com.sunny.livechat.util.LiveUtils;
+import com.sunny.livechat.util.LiveUtil;
 import com.sunny.livechat.util.LogUtil;
 import com.sunny.livechat.util.MEIZU;
 import com.sunny.livechat.util.MIUI;
@@ -67,12 +66,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
 
+@Deprecated
 public class VideoLiveActivity extends BaseActivity implements IChatListener, IChatMsgView {
 
     /**
@@ -279,7 +278,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
             }
         });
 
-        vPlayerView = findViewById(R.id.view1);
+        vPlayerView = findViewById(R.id.rl_player);
         borderW = DensityUtils.screenWidth(this);
         borderH = DensityUtils.screenHeight(this);
 
@@ -328,7 +327,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
 
     @Override
     public void sendChatMsgList() {
-        LogUtil.INSTANCE.i("聊天记录报错成功");
+        LogUtil.INSTANCE.i("聊天记录报存成功");
     }
 
     @Override
@@ -343,7 +342,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
         refreshChatMsg();
     }
 
-    private void refreshChatMsg(){
+    private void refreshChatMsg() {
         liveMsgListAdapter.notifyDataSetChanged();
         recyclerView.scrollToPosition(msgList.size() - 1);
     }
@@ -451,7 +450,7 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
     @Override
     public void onStop() {
         super.onStop();
-        if (!isAppOnForeground()) {
+        if (!LiveUtil.isAppOnForeground()) {
             showLiveWindow();
             ToastUtil.INSTANCE.show("app进入后台了！");
         } else {
@@ -1035,30 +1034,6 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
     }
 
 
-    public boolean isAppOnForeground() {
-        // Returns a list of application processes that are running on the
-        // device
-
-        ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        String packageName = getApplicationContext().getPackageName();
-
-        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager
-                .getRunningAppProcesses();
-        if (appProcesses == null)
-            return false;
-
-        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            // The name of the process that this object is associated with.
-            if (appProcess.processName.equals(packageName)
-                    && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
     private void showLiveWindow() {
 
         fl_video.removeView(vPlayerView);
@@ -1076,18 +1051,18 @@ public class VideoLiveActivity extends BaseActivity implements IChatListener, IC
                     startActivityForResult(intent, 0);
                 }
             } else {
-                LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+                LiveUtil.getInstance().initLive(this, fl_video, vPlayerView);
             }
         } else {
             //6.0以下　只有MUI会修改权限
             if (MIUI.rom()) {
                 if (PermissionUtils.hasPermission(this)) {
-                    LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+                    LiveUtil.getInstance().initLive(this, fl_video, vPlayerView);
                 } else {
                     MIUI.req(this);
                 }
             } else {
-                LiveUtils.getInstance().initLive(this, fl_video, vPlayerView);
+                LiveUtil.getInstance().initLive(this, fl_video, vPlayerView);
             }
         }
 
