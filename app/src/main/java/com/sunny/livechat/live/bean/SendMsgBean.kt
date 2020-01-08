@@ -9,6 +9,7 @@ package com.sunny.livechat.live.bean
 class SendMsgBean {
     var content: String? = null//内容
     var userId: String? = null//发送人
+    val username: String? = null//用户名
     var sendTime: Long? = null//时间戳
     var chatRoomId: String? = null//所属群组
 }

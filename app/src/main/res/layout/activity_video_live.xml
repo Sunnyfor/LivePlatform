@@ -13,7 +13,7 @@
             android:id="@+id/rl_player"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/color_line" />
+            android:background="@color/bg_live_msg" />
     </FrameLayout>
 
     <com.starrtc.starrtcsdk.core.player.StarWhitePanel
@@ -34,10 +34,10 @@
         <EditText
             android:id="@+id/et_input"
             android:layout_width="0dp"
-            android:layout_height="@dimen/dp_35"
+            android:layout_height="@dimen/dp_30"
             android:layout_marginEnd="@dimen/dp_5"
             android:layout_weight="1"
-            android:background="@drawable/sel_live_input"
+            android:background="@drawable/sel_btn_able"
             android:gravity="center_vertical"
             android:hint="来聊吧~"
             android:paddingStart="@dimen/dp_10"
@@ -78,9 +78,14 @@
 
     <TextView
         android:id="@+id/iv_live_id"
-        style="@style/style_font_black"
+        style="@style/style_font_white"
         android:layout_centerHorizontal="true"
-        android:padding="@dimen/dp_10"
+        android:layout_marginTop="@dimen/dp_5"
+        android:background="@drawable/sel_live_input"
+        android:paddingStart="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_5"
+        android:paddingEnd="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_5"
         android:textSize="@dimen/sp_10"
         tools:text="直播号：JoannChen" />
 

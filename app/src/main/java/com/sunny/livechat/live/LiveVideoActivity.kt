@@ -42,6 +42,7 @@ import com.sunny.livechat.live.bean.ViewPosition
 import com.sunny.livechat.live.presenter.ChatMsgPresenter
 import com.sunny.livechat.live.view.IChatMsgView
 import com.sunny.livechat.util.*
+import com.sunny.livechat.util.intent.IntentKey
 import com.sunny.livechat.util.sp.SpKey
 import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
@@ -77,7 +78,6 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     private var creatorId: String? = null
     private var liveCode: String? = null
     private var liveName: String? = null
-    private var liveType: XHConstants.XHLiveType? = null
 
     private var msgList = ArrayList<XHIMMessage>()
     private var playerList = ArrayList<ViewPosition>()
@@ -85,6 +85,12 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     private var liveManager: XHLiveManager? = null
 
     private var mPrivateMsgTargetId: String? = null
+
+
+    /**
+     * uid 和 username 映射，用于消息发送人显示昵称，而非uid
+     */
+    private var msgMap = HashMap<String, String>()
 
     private var starRTCAudioManager: StarRTCAudioManager? = null
 
@@ -110,8 +116,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     override fun initView() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)//全屏显示
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
 
         liveManager = XHClient.getInstance().getLiveManager(this)
 
@@ -122,25 +128,22 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         val dm = resources.displayMetrics
         isPortraitScreen = dm.heightPixels > dm.widthPixels
 
+        borderW = DensityUtils.screenWidth(this)
+        borderH = DensityUtils.screenHeight(this)
+
         val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
-        liveType = XHConstants.XHLiveType.XHLiveTypeGlobalPublic //后期改成接口调用：liveInfoBean.liveClassId
 
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.stackFromEnd = true
-        recyclerView.layoutManager = layoutManager
-        recyclerView.scrollToPosition(liveMsgListAdapter.itemCount - 1)
+        val linearLayoutManager = LinearLayoutManager(this)
+        linearLayoutManager.stackFromEnd = true
+        recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = liveMsgListAdapter
 
-
-        iv_live_id.text = ("直播编号：$liveName")
+        iv_live_id.text = ("直播房间：$liveName")
 
         et_input.clearFocus()
-
-        borderW = DensityUtils.screenWidth(this)
-        borderH = DensityUtils.screenHeight(this)
 
         if (creatorId != null && creatorId == MLOC.userId) {
             startLive()
@@ -196,7 +199,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     }
 
 
-    override fun loadData() {}
+    override fun loadData() {
+        chatMsgPresenter.getUserNickname()
+    }
 
 
     override fun close() {}
@@ -218,6 +223,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         refreshChatMsg()
     }
 
+    override fun getUserNickname(list: ArrayList<SendMsgBean>) {
+        list.forEach {
+            it.userId?.apply {
+                msgMap[this] = it.username ?: ""
+            }
+        }
+        MyApplication.getInstance().putData(IntentKey.dataMap, msgMap)
+    }
 
     override fun dispatchEvent(aEventID: String?, success: Boolean, eventObj: Any?) {
         Logger.e("IM事件分发  $aEventID : $eventObj")

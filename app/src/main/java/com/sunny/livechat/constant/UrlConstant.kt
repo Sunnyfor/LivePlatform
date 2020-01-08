@@ -64,7 +64,7 @@ object UrlConstant {
     const val UPLOAD_IMAGE_URL = "app//sys/sysfujian/upload"
 
     /**
-     * 【直播】获取直播平台的用户信息
+     * 【直播】获取直播平台的用户信息：uid 和 username
      */
     const val GET_LIVE_USER_INFO_URL = "app/sys/user/getUserIdAndNameToList"
 

@@ -62,4 +62,23 @@ class ChatMsgPresenter(view: IChatMsgView) : BasePresenter<IChatMsgView>(view) {
                 }
             })
     }
+
+    /**
+     * 获取用户昵称，用于消息发送人展示
+     */
+    fun getUserNickname() {
+
+        ApiManager.post(null, hashMapOf(), UrlConstant.GET_LIVE_USER_INFO_URL,
+            object : ApiManager.OnResult<BaseModel<ArrayList<SendMsgBean>>>() {
+                override fun onSuccess(model: BaseModel<ArrayList<SendMsgBean>>) {
+                    model.requestResult({
+                        view?.getUserNickname(model.data ?: return@requestResult)
+                    }, {})
+                }
+
+                override fun onFailed(code: String, msg: String) {
+                    ToastUtil.showInterfaceError(code, msg)
+                }
+            })
+    }
 }

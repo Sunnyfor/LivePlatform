@@ -3,6 +3,6 @@
 
     <solid android:color="@color/bg_live_input" />
 
-    <corners android:radius="@dimen/dp_20" />
+    <corners android:radius="@dimen/dp_2" />
 
 </shape>

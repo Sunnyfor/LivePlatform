@@ -28,7 +28,7 @@
     <!--背景色-->
     <color name="bg_bubble_left">#EEEDED</color>
     <color name="bg_bubble_right">#FF9A50</color>
-    <color name="bg_live_input">#6BD4AEB5</color>
+    <color name="bg_live_input">#CCD4AEB5</color>
     <color name="bg_live_msg">#66333333</color>
 
     <!--流式标签-->

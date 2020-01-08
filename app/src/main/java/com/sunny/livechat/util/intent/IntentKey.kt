@@ -17,7 +17,8 @@ object IntentKey {
      * 跳转页传集合使用
      * TaskDetailsFragment -> CargoListActivity
      */
-    const val arrayList = "arrayList"
+    const val dataMap = "dataMap"
+    const val dataList = "dataList"
     const val objectBean = "objectBean"
 
 }
