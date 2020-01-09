@@ -119,56 +119,9 @@ public class LiveUtil {
             toucherLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
             //处理touch
-            toucherLayout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent event) {
+            setOnTouchListener(toucherLayout);
+            setOnTouchListener(vPlayerView.getChildAt(0));
 
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            isMoved = false;
-                            // 记录按下位置
-                            lastX = event.getRawX();
-                            lastY = event.getRawY();
-
-                            start_X = event.getRawX();
-                            start_Y = event.getRawY();
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            isMoved = true;
-                            // 记录移动后的位置
-                            float moveX = event.getRawX();
-                            float moveY = event.getRawY();
-                            // 获取当前窗口的布局属性, 添加偏移量, 并更新界面, 实现移动
-                            params.x += (int) (moveX - lastX);
-                            params.y += (int) (moveY - lastY);
-                            if (toucherLayout != null) {
-                                windowManager.updateViewLayout(toucherLayout, params);
-                            }
-                            lastX = moveX;
-                            lastY = moveY;
-                            break;
-                        case MotionEvent.ACTION_UP:
-
-                            float fmoveX = event.getRawX();
-                            float fmoveY = event.getRawY();
-
-                            if (Math.abs(fmoveX - start_X) < offset && Math.abs(fmoveY - start_Y) < offset) {
-                                isMoved = false;
-                                remove(frameLayout, vPlayerView);
-                                Intent intent = new Intent(context, LiveVideoActivity.class);
-                                context.startActivity(intent);
-
-
-                            } else {
-                                isMoved = true;
-                            }
-                            break;
-                    }
-                    // 如果是移动事件, 则消费掉; 如果不是, 则由其他处理, 比如点击
-                    return isMoved;
-                }
-
-            });
 
             //删除
             imageViewClose.setOnClickListener(new View.OnClickListener() {
@@ -186,9 +139,11 @@ public class LiveUtil {
     public void remove(FrameLayout frameLayout, RelativeLayout vPlayerView) {
         if (windowManager != null && toucherLayout != null) {
             toucherLayout.removeAllViews();
-            windowManager.removeView(toucherLayout);
+            if (toucherLayout.getParent() != null) {
+                windowManager.removeView(toucherLayout);
+                frameLayout.addView(vPlayerView);
+            }
         }
-        frameLayout.addView(vPlayerView);
     }
 
     /**
@@ -213,4 +168,58 @@ public class LiveUtil {
 
         return false;
     }
+
+
+    public void setOnTouchListener(View view) {
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        isMoved = false;
+                        // 记录按下位置
+                        lastX = event.getRawX();
+                        lastY = event.getRawY();
+
+                        start_X = event.getRawX();
+                        start_Y = event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        isMoved = true;
+                        // 记录移动后的位置
+                        float moveX = event.getRawX();
+                        float moveY = event.getRawY();
+                        // 获取当前窗口的布局属性, 添加偏移量, 并更新界面, 实现移动
+                        params.x += (int) (moveX - lastX);
+                        params.y += (int) (moveY - lastY);
+                        if (toucherLayout != null) {
+                            windowManager.updateViewLayout(toucherLayout, params);
+                        }
+                        lastX = moveX;
+                        lastY = moveY;
+                        break;
+                    case MotionEvent.ACTION_UP:
+
+                        float fmoveX = event.getRawX();
+                        float fmoveY = event.getRawY();
+
+                        if (Math.abs(fmoveX - start_X) < offset && Math.abs(fmoveY - start_Y) < offset) {
+                            isMoved = false;
+                            Intent intent = new Intent(view.getContext(), LiveVideoActivity.class);
+                            view.getContext().startActivity(intent);
+
+
+                        } else {
+                            isMoved = true;
+                        }
+                        break;
+                }
+                // 如果是移动事件, 则消费掉; 如果不是, 则由其他处理, 比如点击
+                return isMoved;
+            }
+
+        });
+    }
+
 }
