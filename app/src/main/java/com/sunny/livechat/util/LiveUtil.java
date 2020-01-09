@@ -54,6 +54,13 @@ public class LiveUtil {
     // 是否是移动事件
     private boolean isMoved = false;
 
+
+    /**
+     * 是否需要判断：App是否进入后台
+     * false：如果用户退出直播页，将不再判断app是否进入后台
+     */
+    public boolean isJudgeBackgroundFlag = true;
+
     public static LiveUtil getInstance() {
         if (utils == null) {
             utils = new LiveUtil();
@@ -148,10 +155,11 @@ public class LiveUtil {
         }
     }
 
+
     /**
      * 判断APP是否在前端显示
      */
-    public boolean isAppOnForeground() {
+    private boolean isAppForeground() {
 
         ActivityManager activityManager = (ActivityManager) MyApplication.Companion.getInstance().getSystemService(Context.ACTIVITY_SERVICE);
         String packageName = MyApplication.Companion.getInstance().getPackageName();
@@ -162,13 +170,19 @@ public class LiveUtil {
             return false;
 
         for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            // The name of the process that this object is associated with.
             if (appProcess.processName.equals(packageName) && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * 判断APP是否在后端显示
+     */
+    public boolean isAppOnBackground() {
+        return isJudgeBackgroundFlag && !isAppForeground();
     }
 
 

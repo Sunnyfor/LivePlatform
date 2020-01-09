@@ -385,6 +385,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         if (starRTCAudioManager != null) {
             starRTCAudioManager?.stop()
         }
+        LiveUtil.getInstance().isJudgeBackgroundFlag = false
         removeListener()
         finish()
     }
@@ -958,7 +959,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
     public override fun onStop() {
         super.onStop()
-        if (!LiveUtil.getInstance().isAppOnForeground) {
+        if (LiveUtil.getInstance().isAppOnBackground) {
             showLiveWindow()
         }
     }
