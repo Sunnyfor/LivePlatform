@@ -13,8 +13,11 @@ import com.sunny.livechat.constant.UrlConstant
 import com.sunny.livechat.http.ApiManager
 import com.sunny.livechat.live.adapter.LiveListAdapter
 import com.sunny.livechat.live.bean.LiveListBean
+import com.sunny.livechat.login.LoginActivity
 import com.sunny.livechat.util.ToastUtil
 import com.sunny.livechat.util.sp.SpKey
+import com.sunny.livechat.util.sp.SpUtil
+import com.sunny.livechat.widget.ConfirmDialog
 import kotlinx.android.synthetic.main.activity_live_list.*
 import kotlinx.android.synthetic.main.layout_list.*
 import kotlinx.android.synthetic.main.layout_title.view.*
@@ -32,6 +35,17 @@ class LiveListActivity : BaseActivity() {
 
     private var list: ArrayList<LiveListBean.LiveInfoBean> = arrayListOf()
 
+    private val confirmDialog: ConfirmDialog by lazy {
+        val dialog = ConfirmDialog(this)
+        dialog.prompt = "确定要退出登录吗？"
+        dialog.onConfirmListener = {
+            SpUtil.logout()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+        dialog
+    }
+
     private val liveListAdapter: LiveListAdapter by lazy {
         LiveListAdapter(list).apply {
             this.setOnItemClickListener { _, position ->
@@ -47,7 +61,9 @@ class LiveListActivity : BaseActivity() {
 
     override fun setLayout(): Int = R.layout.activity_live_list
 
-    override fun initTitle(): View = titleManager.defaultTitle("直播大厅").apply {
+    override fun initTitle(): View = titleManager.rightTitle("直播大厅", "退出") {
+        confirmDialog.show()
+    }.apply {
         this.tv_left.visibility = View.INVISIBLE
     }
 
