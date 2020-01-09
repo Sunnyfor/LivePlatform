@@ -7,6 +7,7 @@ import com.starrtc.starrtcsdk.core.im.message.XHIMMessage
 import com.sunny.livechat.R
 import com.sunny.livechat.base.BaseRecycleAdapter
 import com.sunny.livechat.base.BaseRecycleViewHolder
+import com.sunny.livechat.live.bean.GetMsgBean
 import kotlinx.android.synthetic.main.item_live_msg_list.view.*
 
 /**
@@ -15,13 +16,13 @@ import kotlinx.android.synthetic.main.item_live_msg_list.view.*
  * Mail yongzuo.chen@foxmail.com
  * Date 2019/12/23 20:02
  */
-class LiveMsgListAdapter(list: ArrayList<XHIMMessage>, private val userMap: HashMap<String, String>) : BaseRecycleAdapter<XHIMMessage>(list) {
+class LiveMsgListAdapter(list: ArrayList<GetMsgBean>) : BaseRecycleAdapter<GetMsgBean>(list) {
 
     override fun setLayout(parent: ViewGroup, viewType: Int): View =
         LayoutInflater.from(context).inflate(R.layout.item_live_msg_list, parent, false)
 
     override fun onBindViewHolder(holder: BaseRecycleViewHolder, position: Int) {
-        holder.itemView.tv_user_id.text = ("${userMap[getData(position).fromId]} : ")
-        holder.itemView.tv_msg.text = getData(position).contentData
+        holder.itemView.tv_user_id.text =  getData(position).username
+        holder.itemView.tv_msg.text = getData(position).content
     }
 }

@@ -78,7 +78,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     private var liveCode: String? = null
     private var liveName: String? = null
 
-    private var msgList = ArrayList<XHIMMessage>()
+    private var msgList = ArrayList<GetMsgBean>()
     private var playerList = ArrayList<ViewPosition>()
 
     private var liveManager: XHLiveManager? = null
@@ -94,9 +94,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     private var starRTCAudioManager: StarRTCAudioManager? = null
 
     private val liveMsgListAdapter: LiveMsgListAdapter by lazy {
-        LiveMsgListAdapter(this.msgList, userMap).apply {
+        LiveMsgListAdapter(this.msgList).apply {
             this.setOnItemClickListener { _, i ->
-                val clickUserId = this@LiveVideoActivity.msgList[i].fromId
+                val clickUserId = this@LiveVideoActivity.msgList[i].uid ?: "0"
                 showManagerDialog(clickUserId)
             }
         }
@@ -133,7 +133,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        val liveInfoBean =
+            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
@@ -202,9 +203,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
 
     override fun loadData() {
-        if (!userMap.containsKey(creatorId)) {
-            chatMsgPresenter.getUserNickname()
-        }
+
     }
 
 
@@ -217,14 +216,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
 
     override fun getChatMsgList(list: java.util.ArrayList<GetMsgBean>) {
-
-        for (i in list.indices) {
-            val imMessage = XHIMMessage()
-            imMessage.fromId = list[i].uid
-            imMessage.contentData = list[i].content
-            msgList.add(imMessage)
-        }
-        refreshChatMsg()
+        msgList.clear()
+        msgList.addAll(list)
+        refreshChatMsg(null)
     }
 
     override fun getUserNickname(list: ArrayList<SendMsgBean>) {
@@ -233,7 +227,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
                 userMap[this] = it.username ?: ""
             }
         }
-        liveMsgListAdapter.notifyDataSetChanged()
+        refreshChatMsg(msgList.last().uid)
     }
 
     override fun dispatchEvent(aEventID: String?, success: Boolean, eventObj: Any?) {
@@ -319,8 +313,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
             AEvent.AEVENT_LIVE_REV_MSG,
             AEvent.AEVENT_LIVE_REV_PRIVATE_MSG -> {
                 val revMsg = eventObj as XHIMMessage
-                msgList.add(revMsg)
-                refreshChatMsg()
+                msgList.add(GetMsgBean(revMsg))
+                refreshChatMsg(msgList.last().uid)
             }
             AEvent.AEVENT_LIVE_ERROR -> {
                 ToastUtil.show("直播间关闭")
@@ -431,16 +425,16 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         if (TextUtils.isEmpty(mPrivateMsgTargetId)) {
             val imMessage = liveManager?.sendMessage(msg, null)
             imMessage?.let {
-                msgList.add(it)
+                msgList.add(GetMsgBean(it))
             }
 
         } else {
             val imMessage = liveManager?.sendPrivateMessage(msg, mPrivateMsgTargetId, null)
             imMessage?.let {
-                msgList.add(it)
+                msgList.add(GetMsgBean(it))
             }
         }
-        refreshChatMsg()
+        refreshChatMsg(msgList.last().uid)
         mPrivateMsgTargetId = ""
 
         // 走接口保存聊天记录
@@ -456,9 +450,21 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     /**
      * 刷新聊天数据
      */
-    private fun refreshChatMsg() {
-        liveMsgListAdapter.notifyDataSetChanged()
-        recyclerView.scrollToPosition(msgList.size - 1)
+    private fun refreshChatMsg(uid: String?) {
+
+        if (uid == null) {
+            liveMsgListAdapter.notifyDataSetChanged()
+            recyclerView.scrollToPosition(msgList.size - 1)
+            return
+        }
+
+        if (!userMap.containsKey(uid)) {
+            chatMsgPresenter.getUserNickname()
+        } else {
+            val getMsgBean = msgList.last()
+            getMsgBean.username = userMap[getMsgBean.uid]
+            refreshChatMsg(null)
+        }
     }
 
 

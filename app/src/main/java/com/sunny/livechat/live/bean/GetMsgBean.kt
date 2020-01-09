@@ -1,5 +1,7 @@
 package com.sunny.livechat.live.bean
 
+import com.starrtc.starrtcsdk.core.im.message.XHIMMessage
+
 /**
  * Desc 获取聊天记录实体
  * Author JoannChen
@@ -16,4 +18,12 @@ class GetMsgBean {
     var chatRoomId: String? = null
     var toAvatar: String? = null
     var uavatar: String? = null
+
+    constructor()
+
+    constructor(XHIMMessage: XHIMMessage) {
+        this.uid = XHIMMessage.fromId
+        this.time = XHIMMessage.time.toString()
+        this.content = XHIMMessage.contentData
+    }
 }
