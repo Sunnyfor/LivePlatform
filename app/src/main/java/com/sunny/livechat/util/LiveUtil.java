@@ -28,6 +28,7 @@ import java.util.List;
  * Mail yongzuo.chen@foxmail.com
  * Date 2020/1/3 17:21
  */
+@SuppressLint("ClickableViewAccessibility")
 public class LiveUtil {
 
     private LiveUtil() {
@@ -67,7 +68,6 @@ public class LiveUtil {
     }
 
 
-    @SuppressLint("ClickableViewAccessibility")
     public void initLive(final Context context, final FrameLayout frameLayout, final RelativeLayout vPlayerView) {
         try {
 
@@ -141,6 +141,8 @@ public class LiveUtil {
             toucherLayout.removeAllViews();
             if (toucherLayout.getParent() != null) {
                 windowManager.removeView(toucherLayout);
+                toucherLayout.setOnTouchListener(null);
+                vPlayerView.getChildAt(0).setOnTouchListener(null);
                 frameLayout.addView(vPlayerView);
             }
         }
@@ -170,7 +172,7 @@ public class LiveUtil {
     }
 
 
-    public void setOnTouchListener(View view) {
+    private void setOnTouchListener(View view) {
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
