@@ -5,13 +5,11 @@ import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
@@ -43,7 +41,6 @@ import com.sunny.livechat.live.presenter.ChatMsgPresenter
 import com.sunny.livechat.live.view.IChatMsgView
 import com.sunny.livechat.util.*
 import com.sunny.livechat.util.sp.SpKey
-import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -78,20 +75,20 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     private var liveCode: String? = null
     private var liveName: String? = null
 
-    private var msgList = ArrayList<GetMsgBean>()
-    private var playerList = ArrayList<ViewPosition>()
+    private var mPrivateMsgTargetId: String? = null
 
     private var liveManager: XHLiveManager? = null
 
-    private var mPrivateMsgTargetId: String? = null
+    private var starRTCAudioManager: StarRTCAudioManager? = null
 
+    private var msgList = ArrayList<GetMsgBean>()
+
+    private var playerList = ArrayList<ViewPosition>()
 
     /**
      * uid 和 username 映射，用于消息发送人显示昵称，而非uid
      */
     private var userMap = HashMap<String, String>()
-
-    private var starRTCAudioManager: StarRTCAudioManager? = null
 
     private val liveMsgListAdapter: LiveMsgListAdapter by lazy {
         LiveMsgListAdapter(this.msgList).apply {
@@ -115,10 +112,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     override fun initView() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )//全屏显示
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)//全屏显示
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
 
         liveManager = XHClient.getInstance().getLiveManager(this)
@@ -133,14 +127,13 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean =
-            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
 
         val linearLayoutManager = LinearLayoutManager(this)
-        linearLayoutManager.stackFromEnd = true
+//        linearLayoutManager.stackFromEnd = true
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = liveMsgListAdapter
 
@@ -537,14 +530,14 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         newOne.videoPlayer = player
         playerList.add(newOne)
         rl_player.addView(player)
+        /*
+        //设置封面圆角
         val coverView = CircularCoverView(this)
-        coverView.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
+        coverView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         coverView.setCoverColor(Color.BLACK)
         coverView.setRadians(35, 35, 35, 35, 10)
         player.addView(coverView)
+        */
         player.setOnClickListener { v -> changeLayout(v) }
         resetLayout()
         player.setZOrderMediaOverlay(true)
