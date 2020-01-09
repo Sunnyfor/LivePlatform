@@ -42,7 +42,6 @@ import com.sunny.livechat.live.bean.ViewPosition
 import com.sunny.livechat.live.presenter.ChatMsgPresenter
 import com.sunny.livechat.live.view.IChatMsgView
 import com.sunny.livechat.util.*
-import com.sunny.livechat.util.intent.IntentKey
 import com.sunny.livechat.util.sp.SpKey
 import com.sunny.livechat.widget.CircularCoverView
 import kotlinx.android.synthetic.main.activity_video_live.*
@@ -90,12 +89,12 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     /**
      * uid 和 username 映射，用于消息发送人显示昵称，而非uid
      */
-    private var msgMap = HashMap<String, String>()
+    private var userMap = HashMap<String, String>()
 
     private var starRTCAudioManager: StarRTCAudioManager? = null
 
     private val liveMsgListAdapter: LiveMsgListAdapter by lazy {
-        LiveMsgListAdapter(this.msgList).apply {
+        LiveMsgListAdapter(this.msgList, userMap).apply {
             this.setOnItemClickListener { _, i ->
                 val clickUserId = this@LiveVideoActivity.msgList[i].fromId
                 showManagerDialog(clickUserId)
@@ -134,8 +133,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean =
-            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
@@ -204,7 +202,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
 
     override fun loadData() {
-        chatMsgPresenter.getUserNickname()
+        if (!userMap.containsKey(creatorId)) {
+            chatMsgPresenter.getUserNickname()
+        }
     }
 
 
@@ -230,10 +230,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     override fun getUserNickname(list: ArrayList<SendMsgBean>) {
         list.forEach {
             it.userId?.apply {
-                msgMap[this] = it.username ?: ""
+                userMap[this] = it.username ?: ""
             }
         }
-        MyApplication.getInstance().putData(IntentKey.dataMap, msgMap)
+        liveMsgListAdapter.notifyDataSetChanged()
     }
 
     override fun dispatchEvent(aEventID: String?, success: Boolean, eventObj: Any?) {
