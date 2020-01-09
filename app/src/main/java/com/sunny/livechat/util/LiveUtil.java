@@ -62,6 +62,11 @@ public class LiveUtil {
     }
 
 
+    public void close() {
+        utils = null;
+    }
+
+
     @SuppressLint("ClickableViewAccessibility")
     public void initLive(final Context context, final FrameLayout frameLayout, final RelativeLayout vPlayerView) {
         try {
@@ -178,7 +183,7 @@ public class LiveUtil {
 
     }
 
-    private void remove(FrameLayout frameLayout, RelativeLayout vPlayerView) {
+    public void remove(FrameLayout frameLayout, RelativeLayout vPlayerView) {
         if (windowManager != null && toucherLayout != null) {
             toucherLayout.removeAllViews();
             windowManager.removeView(toucherLayout);
@@ -189,7 +194,7 @@ public class LiveUtil {
     /**
      * 判断APP是否在前端显示
      */
-    public static boolean isAppOnForeground() {
+    public boolean isAppOnForeground() {
 
         ActivityManager activityManager = (ActivityManager) MyApplication.Companion.getInstance().getSystemService(Context.ACTIVITY_SERVICE);
         String packageName = MyApplication.Companion.getInstance().getPackageName();

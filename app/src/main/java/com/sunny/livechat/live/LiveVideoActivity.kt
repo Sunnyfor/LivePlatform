@@ -116,7 +116,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
     override fun initView() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)//全屏显示
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )//全屏显示
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
 
         liveManager = XHClient.getInstance().getLiveManager(this)
@@ -131,7 +134,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        val liveInfoBean =
+            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
@@ -256,7 +260,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
             AEvent.AEVENT_LIVE_APPLY_LINK -> {
                 AlertDialog.Builder(this).setCancelable(true)
                     .setTitle(eventObj.toString() + "申请上麦")
-                    .setNegativeButton("拒绝") { _, _ -> liveManager?.refuseApplyToBroadcaster(eventObj as String) }
+                    .setNegativeButton("拒绝") { _, _ ->
+                        liveManager?.refuseApplyToBroadcaster(
+                            eventObj as String
+                        )
+                    }
                     .setPositiveButton("同意") { _, _ -> liveManager?.agreeApplyToBroadcaster(eventObj as String) }
                     .show()
             }
@@ -280,7 +288,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
             AEvent.AEVENT_LIVE_INVITE_LINK -> {
                 AlertDialog.Builder(this).setCancelable(true)
                     .setTitle(eventObj.toString() + "邀请您上麦")
-                    .setNegativeButton("拒绝") { _, _ -> liveManager?.refuseInviteToBroadcaster(eventObj as String) }
+                    .setNegativeButton("拒绝") { _, _ ->
+                        liveManager?.refuseInviteToBroadcaster(
+                            eventObj as String
+                        )
+                    }
                     .setPositiveButton("同意") { _, _ ->
                         iv_mic_btn.isSelected = true
                         iv_switch_camera.visibility = View.VISIBLE
@@ -506,7 +518,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
             AlertDialog.Builder(this).setCancelable(true)
                 .setTitle("是否申请上麦?")
                 .setNegativeButton("取消") { _, _ -> }
-                .setPositiveButton("确定") { _, _ -> liveManager?.applyToBroadcaster(creatorId) }.show()
+                .setPositiveButton("确定") { _, _ -> liveManager?.applyToBroadcaster(creatorId) }
+                .show()
         }
     }
 
@@ -776,7 +789,10 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
                 Toast.makeText(applicationContext, "请开启悬浮窗权限", Toast.LENGTH_LONG).show()
                 //魅族不支持直接打开应用设置
                 if (!MEIZU.isMeizuFlymeOS()) {
-                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
                     startActivityForResult(intent, 0)
                 } else {
                     val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -840,16 +856,24 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
             val valTotal = ValueAnimator.ofFloat(0f, 1f)
             valTotal.addUpdateListener { animation ->
-                clickPlayer.x = clickStartX + animation.animatedValue as Float * (clickEndX - clickStartX)
-                clickPlayer.y = clickStartY + animation.animatedValue as Float * (clickEndY - clickStartY)
-                clickPlayer.layoutParams.width = (clickStartW + animation.animatedValue as Float * (clickEndW - clickStartW)).toInt()
-                clickPlayer.layoutParams.height = (clickStartH + animation.animatedValue as Float * (clickEndH - clickStartH)).toInt()
+                clickPlayer.x =
+                    clickStartX + animation.animatedValue as Float * (clickEndX - clickStartX)
+                clickPlayer.y =
+                    clickStartY + animation.animatedValue as Float * (clickEndY - clickStartY)
+                clickPlayer.layoutParams.width =
+                    (clickStartW + animation.animatedValue as Float * (clickEndW - clickStartW)).toInt()
+                clickPlayer.layoutParams.height =
+                    (clickStartH + animation.animatedValue as Float * (clickEndH - clickStartH)).toInt()
                 clickPlayer.requestLayout()
 
-                mainPlayer.x = mainStartX + animation.animatedValue as Float * (mainEndX - mainStartX)
-                mainPlayer.y = mainStartY + animation.animatedValue as Float * (mainEndY - mainStartY)
-                mainPlayer.layoutParams.width = (mainStartW + animation.animatedValue as Float * (mainEndW - mainStartW)).toInt()
-                mainPlayer.layoutParams.height = (mainStartH + animation.animatedValue as Float * (mainEndH - mainStartH)).toInt()
+                mainPlayer.x =
+                    mainStartX + animation.animatedValue as Float * (mainEndX - mainStartX)
+                mainPlayer.y =
+                    mainStartY + animation.animatedValue as Float * (mainEndY - mainStartY)
+                mainPlayer.layoutParams.width =
+                    (mainStartW + animation.animatedValue as Float * (mainEndW - mainStartW)).toInt()
+                mainPlayer.layoutParams.height =
+                    (mainStartH + animation.animatedValue as Float * (mainEndH - mainStartH)).toInt()
                 mainPlayer.requestLayout()
             }
 
@@ -929,17 +953,20 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
     override fun onRestart() {
         super.onRestart()
-        addListener()
+        LiveUtil.getInstance().remove(fl_video, rl_player)
     }
+
 
     public override fun onStop() {
         super.onStop()
-        if (!LiveUtil.isAppOnForeground()) {
+        if (!LiveUtil.getInstance().isAppOnForeground) {
             showLiveWindow()
-            ToastUtil.show("app进入后台了！")
-        } else {
-            removeListener()
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        removeListener()
+        LiveUtil.getInstance().close()
+    }
 }
