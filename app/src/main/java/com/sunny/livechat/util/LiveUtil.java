@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import com.sunny.livechat.MyApplication;
 import com.sunny.livechat.R;
 import com.sunny.livechat.live.LiveVideoActivity;
+import com.sunny.livechat.util.intent.IntentKey;
 
 import java.util.List;
 
@@ -224,8 +225,7 @@ public class LiveUtil {
                             isMoved = false;
                             Intent intent = new Intent(view.getContext(), LiveVideoActivity.class);
                             view.getContext().startActivity(intent);
-
-
+                            MyApplication.Companion.getInstance().putData(IntentKey.isFloatingWindow, true);
                         } else {
                             isMoved = true;
                         }

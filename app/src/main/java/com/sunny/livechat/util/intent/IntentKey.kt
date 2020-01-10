@@ -21,4 +21,9 @@ object IntentKey {
     const val dataList = "dataList"
     const val objectBean = "objectBean"
 
+    /**
+     * 是否展示悬浮框
+     */
+    const val isFloatingWindow = "isFloatingWindow"
+
 }

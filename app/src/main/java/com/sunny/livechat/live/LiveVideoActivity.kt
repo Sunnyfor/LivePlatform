@@ -40,6 +40,7 @@ import com.sunny.livechat.live.bean.ViewPosition
 import com.sunny.livechat.live.presenter.ChatMsgPresenter
 import com.sunny.livechat.live.view.IChatMsgView
 import com.sunny.livechat.util.*
+import com.sunny.livechat.util.intent.IntentKey
 import com.sunny.livechat.util.sp.SpKey
 import kotlinx.android.synthetic.main.activity_video_live.*
 import org.json.JSONException
@@ -387,6 +388,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         }
         LiveUtil.getInstance().isJudgeBackgroundFlag = false
         removeListener()
+        if (MyApplication.getInstance().getData<Boolean>(IntentKey.isFloatingWindow, true) == true) {
+            startActivity(Intent(this, LiveListActivity::class.java))
+        }
         finish()
     }
 
