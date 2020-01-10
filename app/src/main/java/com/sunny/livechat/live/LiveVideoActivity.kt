@@ -111,9 +111,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
 
     override fun initView() {
-
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)//全屏显示
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )//全屏显示
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
 
         liveManager = XHClient.getInstance().getLiveManager(this)
@@ -128,7 +130,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        val liveInfoBean =
+            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
@@ -162,6 +165,18 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         iv_clean_btn.setOnClickListener(this)
         iv_send_btn.setOnClickListener(this)
         iv_mic_btn.setOnClickListener(this)
+
+
+        val keyboardChangeListener = KeyboardChangeListener(this)
+        keyboardChangeListener.setKeyBoardListener { isShow, _ ->
+
+            if (isShow) {
+                ll_bottom.setPadding(0, 0, 0, resources.getDimension(R.dimen.dp_20).toInt())
+
+            } else {
+                ll_bottom.setPadding(0, 0, 0, 0)
+            }
+        }
     }
 
 
@@ -388,7 +403,11 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         }
         LiveUtil.getInstance().isJudgeBackgroundFlag = false
         removeListener()
-        if (MyApplication.getInstance().getData<Boolean>(IntentKey.isFloatingWindow, true) == true) {
+        if (MyApplication.getInstance().getData<Boolean>(
+                IntentKey.isFloatingWindow,
+                true
+            ) == true
+        ) {
             startActivity(Intent(this, LiveListActivity::class.java))
         }
         finish()
