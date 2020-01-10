@@ -15,6 +15,7 @@ import com.sunny.livechat.live.adapter.LiveListAdapter
 import com.sunny.livechat.live.bean.LiveListBean
 import com.sunny.livechat.login.LoginActivity
 import com.sunny.livechat.util.ToastUtil
+import com.sunny.livechat.util.ToolUtil
 import com.sunny.livechat.util.sp.SpKey
 import com.sunny.livechat.util.sp.SpUtil
 import com.sunny.livechat.widget.ConfirmDialog
@@ -70,6 +71,8 @@ class LiveListActivity : BaseActivity() {
     override fun initView() {
 
         EventBus.getDefault().register(this)
+
+        tv_version.text = ("当前版本：V${ToolUtil.getVersionName()}")
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = liveListAdapter
