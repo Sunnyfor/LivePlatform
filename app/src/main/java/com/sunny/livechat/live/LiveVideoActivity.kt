@@ -82,6 +82,8 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
     private var starRTCAudioManager: StarRTCAudioManager? = null
 
+    private var liveInfoBean: LiveListBean.LiveInfoBean? = null
+
     private var msgList = ArrayList<GetMsgBean>()
 
     private var playerList = ArrayList<ViewPosition>()
@@ -111,11 +113,9 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
 
     override fun initView() {
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //保持屏幕常亮显示
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )//全屏显示
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)//全屏显示
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)//默认隐藏键盘
 
         liveManager = XHClient.getInstance().getLiveManager(this)
@@ -130,8 +130,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         borderW = DensityUtils.screenWidth(this)
         borderH = DensityUtils.screenHeight(this)
 
-        val liveInfoBean =
-            MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
+        liveInfoBean = MyApplication.getInstance().getData<LiveListBean.LiveInfoBean>(SpKey.liveInfoBean)
         liveCode = liveInfoBean?.liveCode
         liveName = liveInfoBean?.liveName
         creatorId = liveInfoBean?.creator
@@ -403,11 +402,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
         }
         LiveUtil.getInstance().isJudgeBackgroundFlag = false
         removeListener()
-        if (MyApplication.getInstance().getData<Boolean>(
-                IntentKey.isFloatingWindow,
-                true
-            ) == true
-        ) {
+        if (MyApplication.getInstance().getData<Boolean>(IntentKey.isFloatingWindow, true) == true) {
             startActivity(Intent(this, LiveListActivity::class.java))
         }
         finish()
@@ -456,7 +451,7 @@ class LiveVideoActivity : BaseActivity(), IChatListener, IChatMsgView {
 
         // 走接口保存聊天记录
         val chatMsgBean = SendMsgBean()
-        chatMsgBean.chatRoomId = liveCode
+        chatMsgBean.chatRoomId = liveInfoBean?.liveId
         chatMsgBean.content = msg
         chatMsgBean.sendTime = System.currentTimeMillis()
         chatMsgPresenter.sendChatMsgList(chatMsgBean)
